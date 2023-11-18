@@ -176,6 +176,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     vendor.qti.hardware.memtrack-service
 
+PRODUCT_PACKAGES += \
+    vendor.display.config@1.9 \
+    vendor.display.config@1.9.vendor \
+
 # DRM
 PRODUCT_PACKAGES += \
     android.hardware.drm-service.clearkey
