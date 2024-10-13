@@ -75,9 +75,9 @@
 
         <Spinner
             android:id="@+id/app_mode"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:visibility="gone" />
+            android:layout_marginTop="2dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 
