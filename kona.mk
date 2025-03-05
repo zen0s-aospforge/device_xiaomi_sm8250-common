@@ -176,6 +176,9 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     vendor.qti.hardware.memtrack-service
 
+# Dolby
+$(call inherit-product, hardware/dolby/dolby.mk)
+
 PRODUCT_PACKAGES += \
     vendor.display.config@1.9 \
     vendor.display.config@1.9.vendor \
