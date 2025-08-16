@@ -133,6 +133,8 @@ vendor.qcom.bluetooth.soc=hastings
 
 # Camera
 persist.vendor.camera.logInfoMask=false
+persist.vendor.camera.logLevel=0
+persist.vendor.camera.sensor=0
 vendor.display.enable_camera_smooth=1
 
 # Chipset
