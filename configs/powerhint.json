@@ -1091,6 +1091,204 @@
       "Value": "0"
     },
     {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "CPULittleClusterMaxFreq",
+      "Duration": 0,
+      "Value": "691200"
+    },
+    {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "CPULittleClusterMinFreq",
+      "Duration": 0,
+      "Value": "691200"
+    },
+    {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "CPUBigClusterMaxFreq",
+      "Duration": 0,
+      "Value": "710400"
+    },
+    {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "CPUBigClusterMinFreq",
+      "Duration": 0,
+      "Value": "710400"
+    },
+    {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "CPUBigPlusClusterMaxFreq",
+      "Duration": 0,
+      "Value": "844800"
+    },
+    {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "CPUBigPlusClusterMinFreq",
+      "Duration": 0,
+      "Value": "844800"
+    },
+    {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "GPUMaxFreq",
+      "Duration": 0,
+      "Value": "1"
+    },
+    {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "GPUMinFreq",
+      "Duration": 0,
+      "Value": "6"
+    },
+    {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "GPUIdleTimer",
+      "Duration": 0,
+      "Value": "80"
+    },
+    {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "CPUBWMinFreq",
+      "Duration": 0,
+      "Value": "2288"
+    },
+    {
+      "PowerHint": "DEVICE_IDLE",
+      "Node": "LLCCBWMinFreq",
+      "Duration": 0,
+      "Value": "762"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "CPULittleClusterMaxFreq",
+      "Duration": 0,
+      "Value": "883200"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "CPULittleClusterMinFreq",
+      "Duration": 0,
+      "Value": "691200"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "CPUBigClusterMaxFreq",
+      "Duration": 0,
+      "Value": "825600"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "CPUBigClusterMinFreq",
+      "Duration": 0,
+      "Value": "710400"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "CPUBigPlusClusterMaxFreq",
+      "Duration": 0,
+      "Value": "960000"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "CPUBigPlusClusterMinFreq",
+      "Duration": 0,
+      "Value": "844800"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "GPUMaxFreq",
+      "Duration": 0,
+      "Value": "1"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "GPUMinFreq",
+      "Duration": 0,
+      "Value": "5"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "GPUIdleTimer",
+      "Duration": 0,
+      "Value": "80"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "CPUBWMinFreq",
+      "Duration": 0,
+      "Value": "2288"
+    },
+    {
+      "PowerHint": "LIGHT_IDLE",
+      "Node": "LLCCBWMinFreq",
+      "Duration": 0,
+      "Value": "762"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "CPULittleClusterMaxFreq",
+      "Duration": 0,
+      "Value": "691200"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "CPULittleClusterMinFreq",
+      "Duration": 0,
+      "Value": "691200"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "CPUBigClusterMaxFreq",
+      "Duration": 0,
+      "Value": "710400"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "CPUBigClusterMinFreq",
+      "Duration": 0,
+      "Value": "710400"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "CPUBigPlusClusterMaxFreq",
+      "Duration": 0,
+      "Value": "844800"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "CPUBigPlusClusterMinFreq",
+      "Duration": 0,
+      "Value": "844800"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "GPUMaxFreq",
+      "Duration": 0,
+      "Value": "1"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "GPUMinFreq",
+      "Duration": 0,
+      "Value": "6"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "GPUIdleTimer",
+      "Duration": 0,
+      "Value": "80"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "CPUBWMinFreq",
+      "Duration": 0,
+      "Value": "2288"
+    },
+    {
+      "PowerHint": "DOZE",
+      "Node": "LLCCBWMinFreq",
+      "Duration": 0,
+      "Value": "762"
+    },
+    {
       "PowerHint": "DOUBLE_TAP_TO_WAKE",
       "Node": "DoubleTapToWake",
       "Duration": 0,

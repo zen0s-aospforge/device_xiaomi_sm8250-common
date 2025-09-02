@@ -166,3 +166,15 @@ on charger
     # Enable UFS powersaving
     write /sys/devices/platform/soc/${ro.boot.bootdevice}/clkscale_enable 1
     write /sys/devices/platform/soc/${ro.boot.bootdevice}/clkgate_enable 1
+
+on property:sys.boot_completed=1
+    # Re-enable low power modes after boot for better doze performance
+    write /sys/module/lpm_levels/parameters/sleep_disabled 0
+
+    # Enable deep idle states for better battery life
+    write /sys/module/lpm_levels/parameters/lpm_prediction 1
+    write /sys/module/lpm_levels/parameters/lpm_ipi_prediction 1
+
+    # Optimize memory bus for idle
+    write /sys/class/devfreq/soc:qcom,cpu-cpu-llcc-bw/bw_hwmon/sample_ms 10
+    write /sys/class/devfreq/soc:qcom,cpu-llcc-ddr-bw/bw_hwmon/sample_ms 10
