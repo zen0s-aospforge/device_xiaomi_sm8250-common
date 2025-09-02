@@ -845,16 +845,40 @@
       "Value": "691200"
     },
     {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_50",
+      "Node": "GPUMaxFreq",
+      "Duration": 3600000,
+      "Value": "1"
+    },
+    {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_50",
+      "Node": "GPUMinFreq",
+      "Duration": 3600000,
+      "Value": "4"
+    },
+    {
       "PowerHint": "LOW_POWER_LITTLE_CLUSTER_60",
       "Node": "CPULittleClusterMaxFreq",
       "Duration": 3600000,
-      "Value": "1075201"
+      "Value": "883200"
     },
     {
       "PowerHint": "LOW_POWER_LITTLE_CLUSTER_60",
       "Node": "CPULittleClusterMinFreq",
       "Duration": 3600000,
-      "Value": "691200"
+      "Value": "576000"
+    },
+    {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_60",
+      "Node": "GPUMaxFreq",
+      "Duration": 3600000,
+      "Value": "1"
+    },
+    {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_60",
+      "Node": "GPUMinFreq",
+      "Duration": 3600000,
+      "Value": "3"
     },
     {
       "PowerHint": "LOW_POWER_LITTLE_CLUSTER_70",
@@ -863,16 +887,52 @@
       "Value": "1344000"
     },
     {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_70",
+      "Node": "GPUMaxFreq",
+      "Duration": 3600000,
+      "Value": "0"
+    },
+    {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_70",
+      "Node": "GPUMinFreq",
+      "Duration": 3600000,
+      "Value": "2"
+    },
+    {
       "PowerHint": "LOW_POWER_LITTLE_CLUSTER_80",
       "Node": "CPULittleClusterMaxFreq",
       "Duration": 3600000,
       "Value": "1516800"
     },
     {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_80",
+      "Node": "GPUMaxFreq",
+      "Duration": 3600000,
+      "Value": "0"
+    },
+    {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_80",
+      "Node": "GPUMinFreq",
+      "Duration": 3600000,
+      "Value": "1"
+    },
+    {
       "PowerHint": "LOW_POWER_LITTLE_CLUSTER_90",
       "Node": "CPULittleClusterMaxFreq",
       "Duration": 3600000,
       "Value": "1612801"
+    },
+    {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_90",
+      "Node": "GPUMaxFreq",
+      "Duration": 3600000,
+      "Value": "0"
+    },
+    {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_90",
+      "Node": "GPUMinFreq",
+      "Duration": 3600000,
+      "Value": "0"
     },
     {
       "PowerHint": "LOW_POWER_CPU_50",
@@ -893,16 +953,28 @@
       "Value": "844800"
     },
     {
+      "PowerHint": "LOW_POWER_CPU_50",
+      "Node": "GPUMaxFreq",
+      "Duration": 3600000,
+      "Value": "1"
+    },
+    {
+      "PowerHint": "LOW_POWER_CPU_50",
+      "Node": "GPUMinFreq",
+      "Duration": 3600000,
+      "Value": "5"
+    },
+    {
       "PowerHint": "LOW_POWER_CPU_60",
       "Node": "CPUBigClusterMaxFreq",
       "Duration": 3600000,
-      "Value": "1056000"
+      "Value": "960000"
     },
     {
       "PowerHint": "LOW_POWER_CPU_60",
       "Node": "CPUBigPlusClusterMaxFreq",
       "Duration": 3600000,
-      "Value": "1305601"
+      "Value": "1056000"
     },
     {
       "PowerHint": "LOW_POWER_CPU_60",
@@ -911,40 +983,88 @@
       "Value": "844800"
     },
     {
+      "PowerHint": "LOW_POWER_CPU_60",
+      "Node": "GPUMaxFreq",
+      "Duration": 3600000,
+      "Value": "1"
+    },
+    {
+      "PowerHint": "LOW_POWER_CPU_60",
+      "Node": "GPUMinFreq",
+      "Duration": 3600000,
+      "Value": "4"
+    },
+    {
       "PowerHint": "LOW_POWER_CPU_70",
       "Node": "CPUBigClusterMaxFreq",
       "Duration": 3600000,
-      "Value": "1478390"
+      "Value": "1305600"
     },
     {
       "PowerHint": "LOW_POWER_CPU_70",
       "Node": "CPUBigPlusClusterMaxFreq",
       "Duration": 3600000,
-      "Value": "1747201"
+      "Value": "1478400"
+    },
+    {
+      "PowerHint": "LOW_POWER_CPU_70",
+      "Node": "GPUMaxFreq",
+      "Duration": 3600000,
+      "Value": "0"
+    },
+    {
+      "PowerHint": "LOW_POWER_CPU_70",
+      "Node": "GPUMinFreq",
+      "Duration": 3600000,
+      "Value": "2"
     },
     {
       "PowerHint": "LOW_POWER_CPU_80",
       "Node": "CPUBigClusterMaxFreq",
       "Duration": 3600000,
-      "Value": "1747201"
+      "Value": "1478400"
     },
     {
       "PowerHint": "LOW_POWER_CPU_80",
       "Node": "CPUBigPlusClusterMaxFreq",
       "Duration": 3600000,
-      "Value": "1862401"
+      "Value": "1612800"
+    },
+    {
+      "PowerHint": "LOW_POWER_CPU_80",
+      "Node": "GPUMaxFreq",
+      "Duration": 3600000,
+      "Value": "0"
+    },
+    {
+      "PowerHint": "LOW_POWER_CPU_80",
+      "Node": "GPUMinFreq",
+      "Duration": 3600000,
+      "Value": "1"
     },
     {
       "PowerHint": "LOW_POWER_CPU_90",
       "Node": "CPUBigClusterMaxFreq",
       "Duration": 3600000,
-      "Value": "1958401"
+      "Value": "1766400"
     },
     {
       "PowerHint": "LOW_POWER_CPU_90",
       "Node": "CPUBigPlusClusterMaxFreq",
       "Duration": 3600000,
-      "Value": "2649600"
+      "Value": "1958400"
+    },
+    {
+      "PowerHint": "LOW_POWER_CPU_90",
+      "Node": "GPUMaxFreq",
+      "Duration": 3600000,
+      "Value": "0"
+    },
+    {
+      "PowerHint": "LOW_POWER_CPU_90",
+      "Node": "GPUMinFreq",
+      "Duration": 3600000,
+      "Value": "0"
     },
     {
       "PowerHint": "DOUBLE_TAP_TO_WAKE",

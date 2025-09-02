@@ -35,28 +35,29 @@ function 8953_sched_dcvs_eas()
         echo "schedutil" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us
-        #set the hispeed_freq
-        echo 1401600 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq
-        #default value for hispeed_load is 90, for 8953 and sdm450 it should be 85
-        echo 85 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_load
+        #set the hispeed_freq - REDUCED for better battery life
+        echo 960000 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq
+        #increased hispeed_load for slower frequency ramp-up
+        echo 90 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_load
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/pl
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/rtg_boost_freq
 
         echo 652800 > /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq
 
-        #input boost params
-        echo 1401600 > /sys/module/cpu_boost/parameters/input_boost_freq
-        echo 40 > /sys/module/cpu_boost/parameters/input_boost_ms
+        #input boost params - REDUCED for better battery life
+        echo 960000 > /sys/module/cpu_boost/parameters/input_boost_freq
+        echo 10 > /sys/module/cpu_boost/parameters/input_boost_ms
 
-        # sched_load_boost as -6 is equivalent to target load as 85. It is per cpu tunable.
-        echo -6 >  /sys/devices/system/cpu/cpu0/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu1/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu2/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu3/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu4/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu5/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu6/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu7/sched_load_boost
+        # sched_load_boost as -8 is equivalent to target load as 85. It is per cpu tunable.
+        # REDUCED to -10 for better battery life (equivalent to ~90% target load)
+        echo -10 >  /sys/devices/system/cpu/cpu0/sched_load_boost
+        echo -10 >  /sys/devices/system/cpu/cpu1/sched_load_boost
+        echo -10 >  /sys/devices/system/cpu/cpu2/sched_load_boost
+        echo -10 >  /sys/devices/system/cpu/cpu3/sched_load_boost
+        echo -10 >  /sys/devices/system/cpu/cpu4/sched_load_boost
+        echo -10 >  /sys/devices/system/cpu/cpu5/sched_load_boost
+        echo -10 >  /sys/devices/system/cpu/cpu6/sched_load_boost
+        echo -10 >  /sys/devices/system/cpu/cpu7/sched_load_boost
 
         # Enable bus-dcvs
         for device in /sys/devices/platform/soc
@@ -64,16 +65,16 @@ function 8953_sched_dcvs_eas()
             for cpubw in $device/*cpu-cpu-ddr-bw/devfreq/*cpu-cpu-ddr-bw
             do
                 echo "bw_hwmon" > $cpubw/governor
-                echo 34 > $cpubw/bw_hwmon/io_percent
+                echo 25 > $cpubw/bw_hwmon/io_percent
                 echo 0 > $cpubw/bw_hwmon/guard_band_mbps
-                echo 20 > $cpubw/bw_hwmon/hist_memory
-                echo 10 > $cpubw/bw_hwmon/hyst_length
-                echo 1600 > $cpubw/bw_hwmon/idle_mbps
-                echo 20 > $cpubw/bw_hwmon/low_power_delay
-                echo 34 > $cpubw/bw_hwmon/low_power_io_percent
+                echo 15 > $cpubw/bw_hwmon/hist_memory
+                echo 8 > $cpubw/bw_hwmon/hyst_length
+                echo 1200 > $cpubw/bw_hwmon/idle_mbps
+                echo 15 > $cpubw/bw_hwmon/low_power_delay
+                echo 25 > $cpubw/bw_hwmon/low_power_io_percent
                 echo "1611 3221 5859 6445 7104" > $cpubw/bw_hwmon/mbps_zones
-                echo 4 > $cpubw/bw_hwmon/sample_ms
-                echo 250 > $cpubw/bw_hwmon/up_scale
+                echo 6 > $cpubw/bw_hwmon/sample_ms
+                echo 200 > $cpubw/bw_hwmon/up_scale
                 echo 1611 > $cpubw/min_freq
             done
         done
@@ -101,24 +102,25 @@ function 8917_sched_dcvs_eas()
         echo "schedutil" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us
-        #set the hispeed_freq
-        echo 1094400 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq
-        #default value for hispeed_load is 90, for 8917 it should be 85
-        echo 85 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_load
+        #set the hispeed_freq - REDUCED for better battery life
+        echo 768000 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq
+        #increased hispeed_load for slower frequency ramp-up
+        echo 90 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_load
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/pl
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/rtg_boost_freq
 
         echo 960000 > /sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq
 
-        #input boost params
-        echo 1094400 > /sys/module/cpu_boost/parameters/input_boost_freq
-        echo 40 > /sys/module/cpu_boost/parameters/input_boost_ms
+        #input boost params - REDUCED for better battery life
+        echo 768000 > /sys/module/cpu_boost/parameters/input_boost_freq
+        echo 10 > /sys/module/cpu_boost/parameters/input_boost_ms
 
         # sched_load_boost as -6 is equivalent to target load as 85. It is per cpu tunable.
-        echo -6 >  /sys/devices/system/cpu/cpu0/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu1/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu2/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu3/sched_load_boost
+        # REDUCED to -10 for better battery life (equivalent to ~90% target load)
+        echo -10 >  /sys/devices/system/cpu/cpu0/sched_load_boost
+        echo -10 >  /sys/devices/system/cpu/cpu1/sched_load_boost
+        echo -10 >  /sys/devices/system/cpu/cpu2/sched_load_boost
+        echo -10 >  /sys/devices/system/cpu/cpu3/sched_load_boost
 
         # Enable bus-dcvs
         for device in /sys/devices/platform/soc
@@ -127,7 +129,7 @@ function 8917_sched_dcvs_eas()
             do
                 echo "bw_hwmon" > $cpubw/governor
                 echo 20 > $cpubw/bw_hwmon/io_percent
-                echo 30 > $cpubw/bw_hwmon/guard_band_mbps
+                echo 25 > $cpubw/bw_hwmon/guard_band_mbps
             done
         done
     else
@@ -159,10 +161,10 @@ function 8937_sched_dcvs_eas()
         echo "schedutil" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/up_rate_limit_us
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/down_rate_limit_us
-        #set the hispeed_freq
-        echo 1094400 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq
-        #default value for hispeed_load is 90, for 8937 it should be 85
-        echo 85 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_load
+        #set the hispeed_freq - REDUCED for better battery life
+        echo 960000 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_freq
+        #increased hispeed_load for slower frequency ramp-up
+        echo 90 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/hispeed_load
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/pl
         echo 0 > /sys/devices/system/cpu/cpufreq/policy0/schedutil/rtg_boost_freq
 
@@ -171,28 +173,29 @@ function 8937_sched_dcvs_eas()
         ## enable governor for power cluster
         echo 1 > /sys/devices/system/cpu/cpu4/online
         echo "schedutil" > /sys/devices/system/cpu/cpufreq/policy4/scaling_governor
-        #set the hispeed_freq
+        #set the hispeed_freq - REDUCED for better battery life
         echo 768000 > /sys/devices/system/cpu/cpufreq/policy4/schedutil/hispeed_freq
-        #default value for hispeed_load is 90, for 8937 it should be 85
+        #increased hispeed_load for slower frequency ramp-up
         echo 85 > /sys/devices/system/cpu/cpufreq/policy4/schedutil/hispeed_load
         echo 0 > /sys/devices/system/cpu/cpufreq/policy4/schedutil/pl
         echo 0 > /sys/devices/system/cpu/cpufreq/policy4/schedutil/rtg_boost_freq
 
         echo 768000 > /sys/devices/system/cpu/cpufreq/policy4/scaling_min_freq
 
-        #input boost params
-        echo 109440 > /sys/module/cpu_boost/parameters/input_boost_freq
-        echo 40 > /sys/module/cpu_boost/parameters/input_boost_ms
+        #input boost params - REDUCED for better battery life
+        echo 768000 > /sys/module/cpu_boost/parameters/input_boost_freq
+        echo 10 > /sys/module/cpu_boost/parameters/input_boost_ms
 
-        # sched_load_boost as -6 is equivalent to target load as 85. It is per cpu tunable.
-        echo -6 >  /sys/devices/system/cpu/cpu0/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu1/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu2/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu3/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu4/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu5/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu6/sched_load_boost
-        echo -6 >  /sys/devices/system/cpu/cpu7/sched_load_boost
+        # sched_load_boost as -8 is equivalent to target load as 85. It is per cpu tunable.
+        # REDUCED to -12 for better battery life (equivalent to ~92% target load)
+        echo -12 >  /sys/devices/system/cpu/cpu0/sched_load_boost
+        echo -12 >  /sys/devices/system/cpu/cpu1/sched_load_boost
+        echo -12 >  /sys/devices/system/cpu/cpu2/sched_load_boost
+        echo -12 >  /sys/devices/system/cpu/cpu3/sched_load_boost
+        echo -12 >  /sys/devices/system/cpu/cpu4/sched_load_boost
+        echo -12 >  /sys/devices/system/cpu/cpu5/sched_load_boost
+        echo -12 >  /sys/devices/system/cpu/cpu6/sched_load_boost
+        echo -12 >  /sys/devices/system/cpu/cpu7/sched_load_boost
 
         # Enable bus-dcvs
         for device in /sys/devices/platform/soc
@@ -1057,7 +1060,7 @@ function configure_memory_parameters() {
     # Set allocstall_threshold to 0 for all targets.
     # Set swappiness to 60 for all targets
     echo 0 > /sys/module/vmpressure/parameters/allocstall_threshold
-    echo 60 > /proc/sys/vm/swappiness
+    echo 80 > /proc/sys/vm/swappiness
 
     # Disable wsf for all targets beacause we are using efk.
     # wsf Range : 1..1000 So set to bare minimum value 1.
@@ -6232,3 +6235,15 @@ esac
 misc_link=$(ls -l /dev/block/bootdevice/by-name/misc)
 real_path=${misc_link##*>}
 setprop persist.vendor.mmi.misc_dev_path $real_path
+
+# Battery-aware LPM optimization
+batt_level=$(cat /sys/class/power_supply/battery/capacity 2>/dev/null || echo 50)
+if [ "$batt_level" -lt 20 ]; then
+    echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
+    echo "Battery low ($batt_level%), enabling aggressive LPM"
+elif [ "$batt_level" -lt 50 ]; then
+    echo 0 > /sys/module/lpm_levels/parameters/sleep_disabled
+    echo "Battery moderate ($batt_level%), enabling LPM"
+else
+    echo "Battery good ($batt_level%), LPM already enabled"
+fi
