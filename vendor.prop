@@ -267,15 +267,3 @@ wifi.aware.interface=wifi-aware0
 
 # Zygote
 zygote.critical_window.minute=10
-
-# Doze mode optimizations for faster entry and minimal power consumption
-ro.device_idle.light.idle.after.inactive.timeout=15000
-ro.device_idle.light.idle.factor=2.0
-ro.device_idle.light.idle.maintenance.max.budget=30000
-ro.device_idle.light.idle.maintenance.min.budget=10000
-ro.device_idle.light.idle.to=300000
-ro.device_idle.light.max.idle.to=21600000
-ro.device_idle.light.pre.idle.to=60000
-ro.device_idle.constants=light_after_inactive_to:15000,light_pre_idle_to:60000,light_idle_to:300000,light_idle_factor:2.0,light_max_idle_to:21600000,light_idle_maintenance_max_budget:30000,light_idle_maintenance_min_budget:10000,min_time_to_alarm:60000,min_deep_time_to_alarm:30000,inactive_to:1800000,sensing_to:600000,locating_to:0,location_accuracy:20.0,motion_inactive_to:600000,idle_after_inactive_to:900000,idle_pending_to:300000,max_idle_pending_to:120000,idle_pending_factor:2.0,idle_to:3600000,max_idle_to:21600000,idle_factor:2.0,min_deep_maintenance_time:30000,deep_maintenance_timeout:86400000,deep_maintenance_cycle:43200000,deep_maintenance_min_budget:30000,deep_maintenance_max_budget:300000,deep_maintenance_cycles:1
-vendor.powerhal.init=0
-vendor.powerhal.saving=1

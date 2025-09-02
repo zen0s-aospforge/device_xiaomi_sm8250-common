@@ -5842,19 +5842,6 @@ case "$target" in
         setprop vendor.dcvs.prop 0
 	setprop vendor.dcvs.prop 1
     echo N > /sys/module/lpm_levels/parameters/sleep_disabled
-
-    # Additional doze optimizations for kona
-    # Enable aggressive power collapse for better doze performance
-    echo 1 > /sys/module/lpm_levels/parameters/lpm_prediction
-    echo 1 > /sys/module/lpm_levels/parameters/lpm_ipi_prediction
-
-    # Optimize memory bus for doze/idle states
-    echo 2288 > /sys/class/devfreq/soc:qcom,cpu-cpu-llcc-bw/min_freq
-    echo 762 > /sys/class/devfreq/soc:qcom,cpu-llcc-ddr-bw/min_freq
-
-    # Configure swappiness for better memory management in doze
-    echo 160 > /proc/sys/vm/swappiness
-
     configure_memory_parameters
     ;;
 esac
