@@ -23,6 +23,12 @@
         android:summary="@string/dc_dimming_enable_summary" />
 
     <SwitchPreferenceCompat
+        android:key="adaptive_refresh_enable"
+        android:defaultValue="false"
+        android:title="@string/adaptive_refresh_enable_title"
+        android:summary="@string/adaptive_refresh_enable_summary" />
+
+    <SwitchPreferenceCompat
         android:key="hbm_mode"
         android:defaultValue="false"
         android:title="@string/hbm_mode_title"

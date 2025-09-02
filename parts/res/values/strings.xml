@@ -130,6 +130,10 @@
     <string name="dc_dimming_enable_summary">DC Dimming reduces eye strain in low light conditions (Note: reduce image quality)</string>
     <string name="dc_dimming_enable_summary_not_supported">DC Dimming is not currently supported by the kernel</string>
 
+    <!-- Adaptive refresh rate settings -->
+    <string name="adaptive_refresh_enable_title">Adaptive Refresh Rate</string>
+    <string name="adaptive_refresh_enable_summary">Automatically boost refresh rate to 120Hz on touch input and reduce to 60Hz when idle</string>
+
     <!--Display settings fragment -->
     <string name="display_settings_title">Custom display settings</string>
     <string name="display_settings_summary">DC Dimming, High Brightness Mode</string>

@@ -26,6 +26,7 @@ import android.provider.Settings;
 
 import org.lineageos.settings.R;
 import org.lineageos.settings.display.DisplayNodes;
+import org.lineageos.settings.refreshrate.RefreshUtils;
 import org.lineageos.settings.utils.FileUtils;
 
 public class DisplaySettingsFragment extends PreferenceFragment implements
@@ -38,6 +39,8 @@ public class DisplaySettingsFragment extends PreferenceFragment implements
     private String HBM_ENABLE_KEY;
     private String HBM_NODE;
     private String BACKLIGHT_NODE;
+    private SwitchPreferenceCompat mAdaptiveRefreshPreference;
+    private static final String ADAPTIVE_REFRESH_ENABLE_KEY = "adaptive_refresh_enable";
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -64,6 +67,13 @@ public class DisplaySettingsFragment extends PreferenceFragment implements
             mHBMPreference.setSummary(R.string.hbm_enable_summary_not_supported);
             mHBMPreference.setEnabled(false);
         }
+
+        // Adaptive refresh rate preference
+        mAdaptiveRefreshPreference = (SwitchPreferenceCompat) findPreference(ADAPTIVE_REFRESH_ENABLE_KEY);
+        if (mAdaptiveRefreshPreference != null) {
+            mAdaptiveRefreshPreference.setChecked(RefreshUtils.isAdaptiveRefreshEnabled(getContext()));
+            mAdaptiveRefreshPreference.setOnPreferenceChangeListener(this);
+        }
     }
 
     @Override
@@ -81,6 +91,10 @@ public class DisplaySettingsFragment extends PreferenceFragment implements
                 // Update the system's screen brightness to maximum
                 Settings.System.putInt(getContext().getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 255);
             }
+        }
+        if (ADAPTIVE_REFRESH_ENABLE_KEY.equals(preference.getKey())) {
+            boolean enabled = (Boolean) newValue;
+            RefreshUtils.setAdaptiveRefreshEnabled(getContext(), enabled);
         }
         return true;
     }

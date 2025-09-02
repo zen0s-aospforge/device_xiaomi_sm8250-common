@@ -1,0 +1,21 @@
+cc_binary {
+    name: "adaptiverated",
+    srcs: ["adaptiverated.cpp"],
+    shared_libs: [
+        "libgui",
+        "libbinder",
+        "libutils", 
+        "liblog",
+        "libbase",
+    ],
+    static_libs: [
+        "libgui_aidl_static",
+    ],
+    cflags: [
+        "-std=gnu++17", 
+        "-Wall",
+        "-Wno-unused-parameter",
+    ],
+    init_rc: ["init.adaptiverated.rc"],
+    vendor: true,
+}

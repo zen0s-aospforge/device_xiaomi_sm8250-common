@@ -1,6 +1,9 @@
 # Audio
 /dev/socket/audio_hw_socket                                                                         u:object_r:vendor_audio_socket:s0
 
+# Adaptive refresh rate
+/vendor/bin/adaptiverated                                                                           u:object_r:adaptiverated_exec:s0
+
 # Bluetooth
 /vendor/bin/init\.mi\.btmac\.sh                                                                     u:object_r:vendor_qti_init_shell_exec:s0
 
