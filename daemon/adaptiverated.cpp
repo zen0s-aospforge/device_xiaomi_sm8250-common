@@ -18,9 +18,8 @@
 
 #include <binder/IServiceManager.h>
 #include <gui/SurfaceComposerClient.h>
-#include <gui/ISurfaceComposer.h>
 #include <android/gui/DisplayModeSpecs.h>
-#include <gui/IDisplayEventConnection.h>
+#include <ui/DisplayId.h>
 
 using namespace android;
 
@@ -40,11 +39,16 @@ static long long now_ms() {
 
 // Wrapper that requests the display mode via SurfaceFlinger API using correct AIDL structure
 static bool requestDisplayRefresh(float hz) {
-    sp<IBinder> displayToken = SurfaceComposerClient::getBuiltInDisplay(
-            ISurfaceComposer::eDisplayIdMain);
-
+    // Get the first physical display (main display)
+    std::vector<PhysicalDisplayId> displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (displayIds.empty()) {
+        ALOGE("AdaptiveRefresh: no physical displays found");
+        return false;
+    }
+    
+    sp<IBinder> displayToken = SurfaceComposerClient::getPhysicalDisplayToken(displayIds[0]);
     if (displayToken == nullptr) {
-        ALOGE("AdaptiveRefresh: failed to get built-in display token");
+        ALOGE("AdaptiveRefresh: failed to get display token for main display");
         return false;
     }
 

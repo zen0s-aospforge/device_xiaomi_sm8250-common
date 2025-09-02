@@ -12,7 +12,7 @@ binder_use(adaptiverated)
 binder_call(adaptiverated, surfaceflinger)
 
 # Allow reading system properties for enable/disable toggle
-get_prop(adaptiverated, system_prop)
+get_prop(adaptiverated, vendor_adaptive_refresh_prop)
 get_prop(adaptiverated, vendor_default_prop)
 
 # Allow writing to logcat
