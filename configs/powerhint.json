@@ -150,7 +150,7 @@
       "Name": "GPUIdleTimer",
       "Path": "/sys/class/kgsl/kgsl-3d0/idle_timer",
       "Values": [
-        "10000",
+        "3000",
         "80"
       ],
       "ResetOnInit": true
@@ -476,7 +476,7 @@
       "PowerHint": "LAUNCH",
       "Node": "GPUIdleTimer",
       "Duration": 5000,
-      "Value": "10000"
+      "Value": "3000"
     },
     {
       "PowerHint": "LAUNCH",
@@ -857,6 +857,12 @@
       "Value": "4"
     },
     {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_50",
+      "Node": "GPUIdleTimer",
+      "Duration": 3600000,
+      "Value": "2000"
+    },
+    {
       "PowerHint": "LOW_POWER_LITTLE_CLUSTER_60",
       "Node": "CPULittleClusterMaxFreq",
       "Duration": 3600000,
@@ -879,6 +885,12 @@
       "Node": "GPUMinFreq",
       "Duration": 3600000,
       "Value": "3"
+    },
+    {
+      "PowerHint": "LOW_POWER_LITTLE_CLUSTER_60",
+      "Node": "GPUIdleTimer",
+      "Duration": 3600000,
+      "Value": "2500"
     },
     {
       "PowerHint": "LOW_POWER_LITTLE_CLUSTER_70",
@@ -965,6 +977,12 @@
       "Value": "5"
     },
     {
+      "PowerHint": "LOW_POWER_CPU_50",
+      "Node": "GPUIdleTimer",
+      "Duration": 3600000,
+      "Value": "2000"
+    },
+    {
       "PowerHint": "LOW_POWER_CPU_60",
       "Node": "CPUBigClusterMaxFreq",
       "Duration": 3600000,
@@ -993,6 +1011,12 @@
       "Node": "GPUMinFreq",
       "Duration": 3600000,
       "Value": "4"
+    },
+    {
+      "PowerHint": "LOW_POWER_CPU_60",
+      "Node": "GPUIdleTimer",
+      "Duration": 3600000,
+      "Value": "2500"
     },
     {
       "PowerHint": "LOW_POWER_CPU_70",
