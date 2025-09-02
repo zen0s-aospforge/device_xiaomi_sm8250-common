@@ -400,6 +400,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     vndservicemanager
 
+# Adaptive Refresh Rate
+PRODUCT_PACKAGES += \
+    adaptiverated
+
 # Vibrator
 ifneq ($(TARGET_IS_TABLET),true)
 $(call inherit-product, vendor/qcom/opensource/vibrator/vibrator-vendor-product.mk)

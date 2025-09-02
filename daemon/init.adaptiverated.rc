@@ -1,0 +1,16 @@
+service adaptiverated /vendor/bin/adaptiverated
+    class main
+    user system
+    group system input graphics
+    capabilities SYS_NICE
+    disabled
+
+on property:persist.sys.adaptive_refresh=1
+    start adaptiverated
+
+on property:persist.sys.adaptive_refresh=0
+    stop adaptiverated
+
+# Ensure we stop if the property gets unset 
+on property:persist.sys.adaptive_refresh=""
+    stop adaptiverated

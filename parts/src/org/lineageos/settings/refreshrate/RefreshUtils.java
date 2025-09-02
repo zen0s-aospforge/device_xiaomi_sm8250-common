@@ -19,6 +19,7 @@ package org.lineageos.settings.refreshrate;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.view.Display;
 
@@ -137,5 +138,16 @@ public final class RefreshUtils {
           }
 	Settings.System.putFloat(mContext.getContentResolver(), KEY_MIN_REFRESH_RATE, minrate);
         Settings.System.putFloat(mContext.getContentResolver(), KEY_PEAK_REFRESH_RATE, maxrate);
+    }
+
+    // Adaptive refresh rate support
+    private static final String ADAPTIVE_REFRESH_PROPERTY = "persist.sys.adaptive_refresh";
+
+    public static boolean isAdaptiveRefreshEnabled(Context context) {
+        return SystemProperties.getBoolean(ADAPTIVE_REFRESH_PROPERTY, false);
+    }
+
+    public static void setAdaptiveRefreshEnabled(Context context, boolean enabled) {
+        SystemProperties.set(ADAPTIVE_REFRESH_PROPERTY, enabled ? "1" : "0");
     }
 }
