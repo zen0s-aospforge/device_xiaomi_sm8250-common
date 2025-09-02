@@ -25,6 +25,7 @@ import android.view.Display;
 
 import android.provider.Settings;
 import androidx.preference.PreferenceManager;
+import java.io.IOException;
 
 public final class RefreshUtils {
 
@@ -141,13 +142,29 @@ public final class RefreshUtils {
     }
 
     // Adaptive refresh rate support
-    private static final String ADAPTIVE_REFRESH_PROPERTY = "persist.sys.adaptive_refresh";
+    private static final String ADAPTIVE_REFRESH_SERVICE = "adaptiverated";
 
     public static boolean isAdaptiveRefreshEnabled(Context context) {
-        return SystemProperties.getBoolean(ADAPTIVE_REFRESH_PROPERTY, false);
+        // Check if the service is currently running
+        try {
+            Process process = Runtime.getRuntime().exec("getprop init.svc." + ADAPTIVE_REFRESH_SERVICE);
+            process.waitFor();
+            java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.InputStreamReader(process.getInputStream()));
+            String result = reader.readLine();
+            reader.close();
+            return "running".equals(result);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static void setAdaptiveRefreshEnabled(Context context, boolean enabled) {
-        SystemProperties.set(ADAPTIVE_REFRESH_PROPERTY, enabled ? "1" : "0");
+        try {
+            String command = enabled ? "start " + ADAPTIVE_REFRESH_SERVICE : "stop " + ADAPTIVE_REFRESH_SERVICE;
+            Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            android.util.Log.e("RefreshUtils", "Failed to " + (enabled ? "start" : "stop") + " adaptive refresh service", e);
+        }
     }
 }
