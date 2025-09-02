@@ -69,9 +69,9 @@ function 8953_sched_dcvs_eas()
                 echo 0 > $cpubw/bw_hwmon/guard_band_mbps
                 echo 15 > $cpubw/bw_hwmon/hist_memory
                 echo 8 > $cpubw/bw_hwmon/hyst_length
-                echo 600 > $cpubw/bw_hwmon/idle_mbps
-                echo 30 > $cpubw/bw_hwmon/low_power_delay
-                echo 15 > $cpubw/bw_hwmon/low_power_io_percent
+                echo 1200 > $cpubw/bw_hwmon/idle_mbps
+                echo 15 > $cpubw/bw_hwmon/low_power_delay
+                echo 25 > $cpubw/bw_hwmon/low_power_io_percent
                 echo "1611 3221 5859 6445 7104" > $cpubw/bw_hwmon/mbps_zones
                 echo 6 > $cpubw/bw_hwmon/sample_ms
                 echo 200 > $cpubw/bw_hwmon/up_scale
