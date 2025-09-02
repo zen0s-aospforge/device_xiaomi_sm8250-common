@@ -11,6 +11,12 @@ cc_binary {
     static_libs: [
         "libgui_aidl_static",
     ],
+    header_libs: [
+        "libbase_headers",
+    ],
+    include_dirs: [
+        "frameworks/native/include",
+    ],
     cflags: [
         "-std=gnu++17", 
         "-Wall",
