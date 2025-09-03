@@ -12,6 +12,8 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#include <signal.h>
+#include <vector>
 
 #include <android-base/properties.h>
 #include <utils/Log.h>
@@ -24,12 +26,20 @@
 using namespace android;
 
 #define TOUCH_DEV "/dev/input/event2"   // fts_ts touch device for SM8250
-#define POLL_TIMEOUT_MS 50
+#define POLL_TIMEOUT_MS 200  // Increased for better power efficiency
 
 // Tuning parameters - adjust these based on testing
 static const int IDLE_TIMEOUT_MS = 800;
 static const int MIN_TIME_AT_120_MS = 1500;
 static const int MIN_TIME_AT_60_MS  = 800;
+
+// Global variables for signal handling
+static volatile bool keep_running = true;
+static volatile bool boosted = false;
+
+static void handle_signal(int) {
+    keep_running = false;
+}
 
 static long long now_ms() {
     struct timespec ts;
@@ -39,16 +49,11 @@ static long long now_ms() {
 
 // Wrapper that requests the display mode via SurfaceFlinger API using correct AIDL structure
 static bool requestDisplayRefresh(float hz) {
-    // Get the first physical display (main display)
-    std::vector<PhysicalDisplayId> displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
-    if (displayIds.empty()) {
-        ALOGE("AdaptiveRefresh: no physical displays found");
-        return false;
-    }
-    
-    sp<IBinder> displayToken = SurfaceComposerClient::getPhysicalDisplayToken(displayIds[0]);
+    // Get the built-in main display (more compatible than physical display APIs)
+    sp<IBinder> displayToken = SurfaceComposerClient::getBuiltInDisplay(
+        ISurfaceComposer::eDisplayIdMain);
     if (displayToken == nullptr) {
-        ALOGE("AdaptiveRefresh: failed to get display token for main display");
+        ALOGE("AdaptiveRefresh: failed to get built-in display token");
         return false;
     }
 
@@ -86,6 +91,10 @@ static bool requestDisplayRefresh(float hz) {
 int main(int argc, char** argv) {
     ALOGI("AdaptiveRefresh daemon starting for SM8250 devices");
 
+    // Set up signal handling for clean shutdown
+    signal(SIGINT, handle_signal);
+    signal(SIGTERM, handle_signal);
+
     // Open input device - verify this path for your specific device
     int fd = open(TOUCH_DEV, O_RDONLY | O_NONBLOCK);
     if (fd < 0) {
@@ -110,26 +119,13 @@ int main(int argc, char** argv) {
 
     long long last_input = 0;
     long long last_switch = 0;
-    bool boosted = false;
+    // Use global boosted variable
 
     // Ensure initial state is 60Hz by default
     requestDisplayRefresh(60.0f);
     last_switch = now_ms();
 
-    while (true) {
-        // Check if user enabled feature via property
-        bool enabled = android::base::GetBoolProperty("persist.sys.adaptive_refresh", false);
-        if (!enabled) {
-            // If disabled, ensure the display is set to default 60Hz and sleep
-            if (boosted) {
-                requestDisplayRefresh(60.0f);
-                boosted = false;
-                last_switch = now_ms();
-            }
-            sleep(1);
-            continue;
-        }
-
+    while (keep_running) {
         struct epoll_event events[4];
         int n = epoll_wait(ep, events, 4, POLL_TIMEOUT_MS);
         long long t = now_ms();
@@ -138,11 +134,31 @@ int main(int argc, char** argv) {
             // Read all available events
             for (int i = 0; i < n; ++i) {
                 if (events[i].data.fd != fd) continue;
-                struct input_event iev;
-                ssize_t r = read(fd, &iev, sizeof(iev));
-                if (r == (ssize_t)sizeof(iev)) {
-                    // Touch-related events: ABS (motion), BTN_TOUCH (down/up)
-                    if (iev.type == EV_ABS || iev.type == EV_KEY) {
+                // Drain all events from this fd
+                while (true) {
+                    struct input_event iev;
+                    ssize_t r = read(fd, &iev, sizeof(iev));
+                    if (r == -1) {
+                        if (errno == EAGAIN || errno == EWOULDBLOCK) break;
+                        ALOGW("AdaptiveRefresh: input read error %s", strerror(errno));
+                        break;
+                    }
+                    if (r != (ssize_t)sizeof(iev)) break;
+
+                    // Filter real touch signals only
+                    bool is_touch = false;
+                    if (iev.type == EV_ABS) {
+                        if (iev.code == ABS_MT_POSITION_X || iev.code == ABS_MT_POSITION_Y ||
+                            iev.code == ABS_X || iev.code == ABS_Y) {
+                            is_touch = true;
+                        }
+                    } else if (iev.type == EV_KEY) {
+                        if (iev.code == BTN_TOUCH && iev.value != 0) { // only on touch down
+                            is_touch = true;
+                        }
+                    }
+                    
+                    if (is_touch) {
                         last_input = t;
                         if (!boosted && (t - last_switch) > MIN_TIME_AT_60_MS) {
                             if (requestDisplayRefresh(120.0f)) {
@@ -164,7 +180,11 @@ int main(int argc, char** argv) {
         }
     }
 
-    // Cleanup (unreachable)
+    // Clean shutdown - restore 60Hz before exit
+    ALOGI("AdaptiveRefresh daemon stopping, restoring 60Hz");
+    requestDisplayRefresh(60.0f); // Always restore 60Hz, safe to call unconditionally
+    boosted = false;
+
     close(fd);
     close(ep);
     return 0;

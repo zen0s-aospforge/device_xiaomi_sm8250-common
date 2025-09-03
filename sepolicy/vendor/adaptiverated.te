@@ -11,10 +11,6 @@ allow adaptiverated surfaceflinger_service:service_manager find;
 binder_use(adaptiverated)
 binder_call(adaptiverated, surfaceflinger)
 
-# Allow reading system properties for enable/disable toggle
-get_prop(adaptiverated, vendor_adaptive_refresh_prop)
-get_prop(adaptiverated, vendor_default_prop)
-
 # Allow writing to logcat
 allow adaptiverated logd_socket:sock_file write;
 allow adaptiverated logd:unix_dgram_socket sendto;
