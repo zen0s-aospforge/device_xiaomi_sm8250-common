@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <vector>
+#include <cmath>
 
 #include <android-base/properties.h>
 #include <utils/Log.h>
@@ -36,6 +37,7 @@ static const int MIN_TIME_AT_60_MS  = 800;
 // Global variables for signal handling
 static volatile bool keep_running = true;
 static volatile bool boosted = false;
+static volatile float current_refresh_rate = 60.0f; // Track current rate to avoid duplicates
 
 static void handle_signal(int) {
     keep_running = false;
@@ -48,7 +50,13 @@ static long long now_ms() {
 }
 
 // Wrapper that requests the display mode via SurfaceFlinger API using correct AIDL structure
-static bool requestDisplayRefresh(float hz) {
+static bool requestDisplayRefresh(float hz, bool force = false) {
+    // Skip if already at the requested refresh rate (unless forced) - use tolerance for float comparison
+    if (!force && fabs(current_refresh_rate - hz) < 0.1f) {
+        ALOGV("AdaptiveRefresh: already at %.1f Hz (current: %.1f), skipping", hz, current_refresh_rate);
+        return true;
+    }
+
     // Query all physical display IDs
     std::vector<PhysicalDisplayId> displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
     if (displayIds.empty()) {
@@ -95,7 +103,10 @@ static bool requestDisplayRefresh(float hz) {
         return false;
     }
 
-    ALOGI("AdaptiveRefresh: requested %.1f Hz", hz);
+    // Update our tracked rate on success
+    float old_rate = current_refresh_rate;
+    current_refresh_rate = hz;
+    ALOGI("AdaptiveRefresh: %.1f → %.1f Hz %s", old_rate, hz, force ? "(forced)" : "");
     return true;
 }
 
@@ -132,8 +143,8 @@ int main(int argc, char** argv) {
     long long last_switch = 0;
     // Use global boosted variable
 
-    // Ensure initial state is 60Hz by default
-    requestDisplayRefresh(60.0f);
+    // Ensure initial state is 60Hz by default (force to ensure it's set)
+    requestDisplayRefresh(60.0f, true);
     last_switch = now_ms();
 
     while (keep_running) {
@@ -193,7 +204,7 @@ int main(int argc, char** argv) {
 
     // Clean shutdown - restore 60Hz before exit
     ALOGI("AdaptiveRefresh daemon stopping, restoring 60Hz");
-    requestDisplayRefresh(60.0f); // Always restore 60Hz, safe to call unconditionally
+    requestDisplayRefresh(60.0f, true); // Force restore 60Hz on exit
     boosted = false;
 
     close(fd);
