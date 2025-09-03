@@ -1,2 +1,5 @@
 # SettingsLib
 system_public_prop(settingslib_prop)
+
+# Adaptive refresh rate property
+system_public_prop(adaptive_refresh_prop)

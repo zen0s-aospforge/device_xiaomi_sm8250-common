@@ -2,4 +2,4 @@
 hal_client_domain(system_app, hal_mlipay)
 
 # Allow system_app to set adaptive refresh property
-set_prop(system_app, vendor_adaptive_refresh_prop)
+set_prop(system_app, adaptive_refresh_prop)

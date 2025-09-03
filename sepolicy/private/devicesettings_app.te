@@ -29,4 +29,4 @@ allow devicesettings_app sysfs_htsr:file rw_file_perms;
 get_prop(devicesettings_app, settingslib_prop)
 
 # Allow DeviceSettings to set adaptive refresh property
-set_prop(devicesettings_app, vendor_adaptive_refresh_prop)
+set_prop(devicesettings_app, adaptive_refresh_prop)
