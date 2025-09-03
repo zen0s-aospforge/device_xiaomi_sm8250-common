@@ -49,11 +49,22 @@ static long long now_ms() {
 
 // Wrapper that requests the display mode via SurfaceFlinger API using correct AIDL structure
 static bool requestDisplayRefresh(float hz) {
-    // Get the built-in main display (more compatible than physical display APIs)
-    sp<IBinder> displayToken = SurfaceComposerClient::getBuiltInDisplay(
-        ISurfaceComposer::eDisplayIdMain);
+    // Query all physical display IDs
+    std::vector<PhysicalDisplayId> displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (displayIds.empty()) {
+        ALOGE("AdaptiveRefresh: no physical displays found");
+        return false;
+    }
+
+    // Usually [0] is main panel, but log for debugging
+    ALOGI("AdaptiveRefresh: found %zu display(s), using ID=%llu", 
+          displayIds.size(), (unsigned long long)displayIds[0].value);
+
+    // Use the first display (assumed main panel)
+    sp<IBinder> displayToken = SurfaceComposerClient::getPhysicalDisplayToken(displayIds[0]);
     if (displayToken == nullptr) {
-        ALOGE("AdaptiveRefresh: failed to get built-in display token");
+        ALOGE("AdaptiveRefresh: failed to get display token for ID=%llu",
+              (unsigned long long)displayIds[0].value);
         return false;
     }
 
