@@ -1,2 +1,0 @@
-# Allow priv_app to set adaptive refresh property
-set_prop(priv_app, vendor_adaptive_refresh_prop)

@@ -57,6 +57,3 @@ persist.sensor.                                                                 
 persist.sys.thermal.config                                                                          u:object_r:vendor_thermal_normal_prop:s0
 sys.thermal.                                                                                        u:object_r:vendor_thermal_normal_prop:s0
 vendor.sys.thermal.                                                                                 u:object_r:vendor_thermal_normal_prop:s0
-
-# Adaptive refresh rate
-vendor.adaptive_refresh.enabled                                                                     u:object_r:vendor_adaptive_refresh_prop:s0

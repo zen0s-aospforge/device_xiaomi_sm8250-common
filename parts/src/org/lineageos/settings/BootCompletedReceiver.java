@@ -53,6 +53,16 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         RefreshUtils.startService(context);
         TouchSamplingUtils.restoreSamplingValue(context);
 
+        // Restore adaptive refresh rate service if enabled
+        if (RefreshUtils.isAdaptiveRefreshEnabled(context)) {
+            try {
+                Runtime.getRuntime().exec("start adaptiverated");
+                Log.d(TAG, "Restored adaptive refresh rate service on boot");
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to restore adaptive refresh rate service", e);
+            }
+        }
+
         // DC Dimming
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 

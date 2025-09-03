@@ -143,26 +143,32 @@ public final class RefreshUtils {
 
     // Adaptive refresh rate support
     private static final String ADAPTIVE_REFRESH_SERVICE = "adaptiverated";
-    private static final String ADAPTIVE_REFRESH_PREF_KEY = "adaptive_refresh_enabled";
-    private static final String ADAPTIVE_REFRESH_PROPERTY = "vendor.adaptive_refresh.enabled";
+    private static final String ADAPTIVE_REFRESH_SETTING = "adaptive_refresh_enabled";
 
     public static boolean isAdaptiveRefreshEnabled(Context context) {
-        // Use SharedPreferences for persistent state
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getBoolean(ADAPTIVE_REFRESH_PREF_KEY, false);
+        // Read from Settings.System for persistent state
+        return android.provider.Settings.System.getInt(
+            context.getContentResolver(),
+            ADAPTIVE_REFRESH_SETTING,
+            0
+        ) == 1;
     }
 
     public static void setAdaptiveRefreshEnabled(Context context, boolean enabled) {
-        // Store state in SharedPreferences
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        prefs.edit().putBoolean(ADAPTIVE_REFRESH_PREF_KEY, enabled).apply();
+        // Store state in Settings.System
+        android.provider.Settings.System.putInt(
+            context.getContentResolver(),
+            ADAPTIVE_REFRESH_SETTING,
+            enabled ? 1 : 0
+        );
         
-        // Set vendor property to control the service
+        // Control the service directly
         try {
-            SystemProperties.set(ADAPTIVE_REFRESH_PROPERTY, enabled ? "1" : "0");
-            android.util.Log.d("RefreshUtils", "Set adaptive refresh property to: " + (enabled ? "1" : "0"));
+            String command = enabled ? "start " + ADAPTIVE_REFRESH_SERVICE : "stop " + ADAPTIVE_REFRESH_SERVICE;
+            Runtime.getRuntime().exec(command);
+            android.util.Log.d("RefreshUtils", "Successfully " + (enabled ? "started" : "stopped") + " adaptive refresh service");
         } catch (Exception e) {
-            android.util.Log.e("RefreshUtils", "Failed to set adaptive refresh property", e);
+            android.util.Log.e("RefreshUtils", "Failed to " + (enabled ? "start" : "stop") + " adaptive refresh service", e);
         }
     }
 }
