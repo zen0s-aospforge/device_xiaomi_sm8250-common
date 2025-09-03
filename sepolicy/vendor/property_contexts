@@ -60,3 +60,4 @@ vendor.sys.thermal.                                                             
 
 # Adaptive refresh rate
 persist.sys.adaptive_refresh                                                                        u:object_r:vendor_adaptive_refresh_prop:s0
+vendor.adaptive_refresh.enabled                                                                     u:object_r:vendor_adaptive_refresh_prop:s0

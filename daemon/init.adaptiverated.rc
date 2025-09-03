@@ -5,3 +5,9 @@ service adaptiverated /vendor/bin/adaptiverated
     capabilities SYS_NICE
     disabled
     oneshot
+
+on property:vendor.adaptive_refresh.enabled=1
+    start adaptiverated
+
+on property:vendor.adaptive_refresh.enabled=0
+    stop adaptiverated
