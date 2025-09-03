@@ -59,5 +59,4 @@ sys.thermal.                                                                    
 vendor.sys.thermal.                                                                                 u:object_r:vendor_thermal_normal_prop:s0
 
 # Adaptive refresh rate
-persist.sys.adaptive_refresh                                                                        u:object_r:adaptive_refresh_prop:s0
-vendor.adaptive_refresh.enabled                                                                     u:object_r:adaptive_refresh_prop:s0
+vendor.adaptive_refresh.enabled                                                                     u:object_r:vendor_adaptive_refresh_prop:s0
