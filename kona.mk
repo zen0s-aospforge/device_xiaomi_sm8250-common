@@ -156,6 +156,9 @@ endif
 PRODUCT_PACKAGES += \
     XiaomiParts
 
+# Dolby
+$(call inherit-product, hardware/dolby/dolby.mk)
+
 # Display
 PRODUCT_PACKAGES += \
     vendor.qti.hardware.display.composer-service
