@@ -44,7 +44,7 @@
             android:maxLines="1"
             android:textAlignment="viewStart"
             android:textColor="?android:attr/textColorPrimary"
-            android:textStyle="600"
+            android:textStyle="bold"
             style="?android:attr/textAppearanceMedium" />
 
         <TextView
