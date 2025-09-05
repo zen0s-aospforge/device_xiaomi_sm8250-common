@@ -42,8 +42,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.android.settingslib.applications.ApplicationsState;
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.chip.Chip;
 
 import org.lineageos.settings.R;
 
@@ -244,9 +242,9 @@ public class ThermalSettingsFragment extends PreferenceFragment
         private ImageView stateIcon;
         private View touchCard;
         private ImageView touchIcon;
-        private Chip modeChip;
-        private MaterialCardView iconCard;
-        private MaterialCardView stateCard;
+        private TextView modeChip;
+        private View iconCard;
+        private View stateCard;
 
         private ViewHolder(View view) {
             super(view);
