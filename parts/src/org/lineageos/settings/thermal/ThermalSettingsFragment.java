@@ -42,6 +42,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.android.settingslib.applications.ApplicationsState;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.chip.Chip;
 
 import org.lineageos.settings.R;
 
@@ -214,13 +216,37 @@ public class ThermalSettingsFragment extends PreferenceFragment
         }
     }
 
+    private int getStateGradient(int state) {
+        switch (state) {
+            case ThermalUtils.STATE_BENCHMARK:
+                return R.drawable.gradient_thermal_benchmark;
+            case ThermalUtils.STATE_BROWSER:
+                return R.drawable.gradient_thermal_browser;
+            case ThermalUtils.STATE_CAMERA:
+                return R.drawable.gradient_thermal_camera;
+            case ThermalUtils.STATE_DIALER:
+                return R.drawable.gradient_thermal_dialer;
+            case ThermalUtils.STATE_GAMING:
+                return R.drawable.gradient_thermal_gaming;
+            case ThermalUtils.STATE_STREAMING:
+                return R.drawable.gradient_thermal_streaming;
+            case ThermalUtils.STATE_DEFAULT:
+            default:
+                return R.drawable.gradient_thermal_default;
+        }
+    }
+
     private class ViewHolder extends RecyclerView.ViewHolder {
         private TextView title;
         private Spinner mode;
         private ImageView icon;
         private View rootView;
         private ImageView stateIcon;
+        private View touchCard;
         private ImageView touchIcon;
+        private Chip modeChip;
+        private MaterialCardView iconCard;
+        private MaterialCardView stateCard;
 
         private ViewHolder(View view) {
             super(view);
@@ -228,7 +254,11 @@ public class ThermalSettingsFragment extends PreferenceFragment
             this.mode = view.findViewById(R.id.app_mode);
             this.icon = view.findViewById(R.id.app_icon);
             this.stateIcon = view.findViewById(R.id.state);
+            this.touchCard = view.findViewById(R.id.touch_card);
             this.touchIcon = view.findViewById(R.id.touch);
+            this.modeChip = view.findViewById(R.id.app_mode_chip);
+            this.iconCard = view.findViewById(R.id.icon_card);
+            this.stateCard = view.findViewById(R.id.state_card);
             this.rootView = view;
 
             view.setTag(this);
@@ -324,7 +354,7 @@ public class ThermalSettingsFragment extends PreferenceFragment
                 return;
             }
 
-            holder.touchIcon.setOnClickListener(new View.OnClickListener() {
+            holder.touchCard.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     TouchSettingsFragment touchSettingsFragment = new TouchSettingsFragment();
@@ -340,21 +370,36 @@ public class ThermalSettingsFragment extends PreferenceFragment
             });
 
             holder.title.setText(entry.label);
-            holder.title.setOnClickListener(v -> holder.mode.performClick());
+            holder.modeChip.setOnClickListener(v -> holder.mode.performClick());
+            holder.rootView.setOnClickListener(v -> holder.mode.performClick());
+            
             mApplicationsState.ensureIcon(entry);
             holder.icon.setImageDrawable(entry.icon);
+            
             int packageState = mThermalUtils.getStateForPackage(entry.info.packageName);
             holder.mode.setSelection(packageState, false);
             holder.mode.setTag(entry);
-            int stateIconDawable = getStateDrawable(mThermalUtils.getStateForPackage(
-                    entry.info.packageName));
-            if (stateIconDawable == R.drawable.ic_thermal_gaming ||
-                    stateIconDawable == R.drawable.ic_thermal_benchmark) {
-                holder.touchIcon.setVisibility(View.VISIBLE);
-            } else {
-                holder.touchIcon.setVisibility(View.GONE);
+            
+            // Update chip text based on current state
+            String[] thermalModes = getResources().getStringArray(R.array.thermal_state_entries);
+            if (packageState >= 0 && packageState < thermalModes.length) {
+                holder.modeChip.setText(thermalModes[packageState]);
             }
-            holder.stateIcon.setImageResource(stateIconDawable);
+            
+            int stateIconDrawable = getStateDrawable(mThermalUtils.getStateForPackage(
+                    entry.info.packageName));
+            int stateGradient = getStateGradient(packageState);
+            
+            // Apply gradient background to state card
+            holder.stateCard.setBackgroundResource(stateGradient);
+            
+            if (stateIconDrawable == R.drawable.ic_thermal_gaming ||
+                    stateIconDrawable == R.drawable.ic_thermal_benchmark) {
+                holder.touchCard.setVisibility(View.VISIBLE);
+            } else {
+                holder.touchCard.setVisibility(View.GONE);
+            }
+            holder.stateIcon.setImageResource(stateIconDrawable);
         }
 
         private void setEntries(List<ApplicationsState.AppEntry> entries,
