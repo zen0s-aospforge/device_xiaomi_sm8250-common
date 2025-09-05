@@ -30,4 +30,16 @@
         <item name="alertDialogTheme">@style/Theme.AlertDialog.SettingsLib</item>
     </style>
 
+    <!-- Modern thermal chip style -->
+    <style name="ThermalChipStyle">
+        <item name="android:textSize">12sp</item>
+        <item name="chipCornerRadius">16dp</item>
+        <item name="chipMinHeight">36dp</item>
+        <item name="chipStartPadding">14dp</item>
+        <item name="chipEndPadding">14dp</item>
+        <item name="ensureMinTouchTargetSize">false</item>
+        <item name="chipBackgroundColor">?android:attr/colorAccent</item>
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+    </style>
+
 </resources>

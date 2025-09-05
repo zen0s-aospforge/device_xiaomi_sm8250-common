@@ -11,70 +11,133 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="?android:attr/listPreferredItemHeight"
-    android:paddingBottom="4dp"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingTop="4dp">
-
-    <ImageView
-        android:id="@+id/app_icon"
-        android:layout_width="@android:dimen/app_icon_size"
-        android:layout_height="@android:dimen/app_icon_size"
-        android:layout_marginEnd="8dp"
-        android:contentDescription="@null"
-        android:scaleType="centerInside" />
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp"
+    android:foreground="@drawable/thermal_card_background"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="?android:attr/colorBackgroundFloating">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:padding="20dp"
+        android:gravity="center_vertical"
+        android:minHeight="88dp">
 
-        <TextView
-            android:id="@+id/app_name"
-            android:layout_width="match_parent"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/icon_card"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="20dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="?android:attr/colorAccent">
+            
+            <ImageView
+                android:id="@+id/app_icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:scaleType="centerInside" />
+                
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="2dp"
-            android:ellipsize="marquee"
-            android:singleLine="true"
-            android:textAlignment="viewStart"
-            android:textColor="?android:attr/textColorPrimary"
-            style="?android:attr/textAppearanceMedium" />
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <Spinner
-            android:id="@+id/app_mode"
+            <TextView
+                android:id="@+id/app_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAlignment="viewStart"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="@android:string/config_headlineFontFamily" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/app_mode_chip"
+                style="@style/ThermalChipStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/thermal_default"
+                android:contentDescription="@string/thermal_title" />
+
+            <Spinner
+                android:id="@+id/app_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/touch_card"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="?android:attr/colorControlNormal"
+                app:cardBackgroundColor="?android:attr/colorBackground">
+                
+                <ImageView
+                    android:id="@+id/touch"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_touch"
+                    android:contentDescription="@string/thermal_title" />
+                    
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/state_card"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="?android:attr/colorSecondary">
+                
+                <ImageView
+                    android:id="@+id/state"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_thermal_default"
+                    app:tint="?android:attr/textColorPrimaryInverse" />
+                    
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:layout_gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <ImageView
-            android:id="@+id/touch"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:scaleType="centerInside"
-            android:visibility="invisible"
-            android:src="@drawable/ic_touch" />
-
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/state"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:padding="8dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_thermal_default" />
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

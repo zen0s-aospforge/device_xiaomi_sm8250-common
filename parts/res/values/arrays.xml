@@ -114,5 +114,17 @@
         <item>1</item>
         <item>2</item>
         <item>3</item>
-    </string-array> 
+    </string-array>
+
+    <!-- Thermal state entries for display -->
+    <string-array name="thermal_state_entries" translatable="false">
+        <item>@string/thermal_default</item>
+        <item>@string/thermal_benchmark</item>
+        <item>@string/thermal_browser</item>
+        <item>@string/thermal_camera</item>
+        <item>@string/thermal_dialer</item>
+        <item>@string/thermal_gaming</item>
+        <item>@string/thermal_streaming</item>
+    </string-array>
+    
 </resources>
