@@ -243,7 +243,6 @@ public class ThermalSettingsFragment extends PreferenceFragment
         private View touchCard;
         private ImageView touchIcon;
         private TextView modeChip;
-        private View iconCard;
         private View stateCard;
 
         private ViewHolder(View view) {
@@ -255,7 +254,6 @@ public class ThermalSettingsFragment extends PreferenceFragment
             this.touchCard = view.findViewById(R.id.touch_card);
             this.touchIcon = view.findViewById(R.id.touch);
             this.modeChip = view.findViewById(R.id.app_mode_chip);
-            this.iconCard = view.findViewById(R.id.icon_card);
             this.stateCard = view.findViewById(R.id.state_card);
             this.rootView = view;
 
