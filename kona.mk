@@ -334,6 +334,13 @@ PRODUCT_PACKAGES += \
     android.hardware.sensors@1.0-impl-xiaomi \
     android.hardware.sensors@1.0-service
 
+#ADB AND USB DEBUGGING ON BOOT
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.sys.usb.config=mtp,adb \
+    ro.adb.secure=0 \
+    ro.secure=0 \
+    ro.debuggable=1
+
 # Soong namespaces
 PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH) \
