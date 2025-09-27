@@ -15,17 +15,19 @@
  */
 package org.lineageos.settings.thermal
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageView
+import android.widget.SectionIndexer
+import android.widget.TextView
 import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -43,6 +45,41 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
     private lateinit var appsRecyclerView: RecyclerView
     private lateinit var thermalUtils: ThermalUtils
 
+    // Map of thermal states to their string resource IDs
+    private val thermalModeStringResMap = mapOf(
+        ThermalUtils.STATE_DEFAULT to R.string.thermal_default,
+        ThermalUtils.STATE_BENCHMARK to R.string.thermal_benchmark,
+        ThermalUtils.STATE_BROWSER to R.string.thermal_browser,
+        ThermalUtils.STATE_CAMERA to R.string.thermal_camera,
+        ThermalUtils.STATE_DIALER to R.string.thermal_dialer,
+        ThermalUtils.STATE_GAMING to R.string.thermal_gaming,
+        ThermalUtils.STATE_STREAMING to R.string.thermal_streaming
+    )
+
+    // Options for the AlertDialog (text and state value)
+    private val thermalModeDialogOptions by lazy {
+        listOf(
+            Pair(getString(R.string.thermal_default), ThermalUtils.STATE_DEFAULT),
+            Pair(getString(R.string.thermal_benchmark), ThermalUtils.STATE_BENCHMARK),
+            Pair(getString(R.string.thermal_browser), ThermalUtils.STATE_BROWSER),
+            Pair(getString(R.string.thermal_camera), ThermalUtils.STATE_CAMERA),
+            Pair(getString(R.string.thermal_dialer), ThermalUtils.STATE_DIALER),
+            Pair(getString(R.string.thermal_gaming), ThermalUtils.STATE_GAMING),
+            Pair(getString(R.string.thermal_streaming), ThermalUtils.STATE_STREAMING)
+        )
+    }
+
+    // **NEW**: Map of thermal states to their icon resource IDs
+    private val thermalModeIconResMap = mapOf(
+        ThermalUtils.STATE_DEFAULT to R.drawable.ic_thermal_default,
+        ThermalUtils.STATE_BENCHMARK to R.drawable.ic_thermal_benchmark,
+        ThermalUtils.STATE_BROWSER to R.drawable.ic_thermal_browser,
+        ThermalUtils.STATE_CAMERA to R.drawable.ic_thermal_camera,
+        ThermalUtils.STATE_DIALER to R.drawable.ic_thermal_dialer,
+        ThermalUtils.STATE_GAMING to R.drawable.ic_thermal_gaming,
+        ThermalUtils.STATE_STREAMING to R.drawable.ic_thermal_streaming
+    )
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +87,6 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
 
         applicationsState = ApplicationsState.getInstance(requireActivity().application)
         session = applicationsState.newSession(this)
-        session.onResume()
         activityFilter = ActivityFilter(requireActivity().packageManager)
 
         allPackagesAdapter = AllPackagesAdapter(requireActivity())
@@ -79,6 +115,7 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
         super.onResume()
         session.onResume()
         rebuild()
+        allPackagesAdapter.notifyDataSetChanged()
     }
 
     override fun onPause() {
@@ -86,11 +123,10 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
         session.onPause()
     }
 
-    // ApplicationsState.Callbacks implementation
     override fun onRunningStateChanged(running: Boolean) {}
     override fun onPackageListChanged() = rebuild()
     override fun onRebuildComplete(entries: ArrayList<ApplicationsState.AppEntry>) = handleAppEntries(entries)
-    override fun onPackageIconChanged() {}
+    override fun onPackageIconChanged() {} 
     override fun onPackageSizeChanged(packageName: String) {}
     override fun onAllSizesComputed() {}
     override fun onLauncherInfoChanged() {}
@@ -103,13 +139,15 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
         var lastSectionIndex: String? = null
         var offset = 0
 
-        entries.forEach { entry ->
+        val filteredEntries = entries.filter { activityFilter.filterApp(it) }
+
+        filteredEntries.forEach { entry ->
             val info = entry.info
-            val label = info.loadLabel(pm).toString()
+            val label = entry.label ?: info.loadLabel(pm).toString()
             val sectionIndex = when {
                 !info.enabled -> "--"
                 TextUtils.isEmpty(label) -> ""
-                else -> label.substring(0, 1).uppercase()
+                else -> label.substring(0, 1).uppercase(Locale.getDefault())
             }
 
             if (lastSectionIndex == null || !TextUtils.equals(sectionIndex, lastSectionIndex)) {
@@ -120,9 +158,9 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
             offset++
         }
 
-        allPackagesAdapter.setEntries(entries, sections, positions)
+        allPackagesAdapter.setEntries(filteredEntries, sections, positions)
         entryMap.clear()
-        entries.forEach { entry ->
+        filteredEntries.forEach { entry ->
             entryMap[entry.info.packageName] = entry
         }
     }
@@ -131,121 +169,90 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
         session.rebuild(activityFilter, ApplicationsState.ALPHA_COMPARATOR)
     }
 
-    private fun getStateDrawable(state: Int): Int = when (state) {
-        ThermalUtils.STATE_BENCHMARK -> R.drawable.ic_thermal_benchmark
-        ThermalUtils.STATE_BROWSER -> R.drawable.ic_thermal_browser
-        ThermalUtils.STATE_CAMERA -> R.drawable.ic_thermal_camera
-        ThermalUtils.STATE_DIALER -> R.drawable.ic_thermal_dialer
-        ThermalUtils.STATE_GAMING -> R.drawable.ic_thermal_gaming
-        ThermalUtils.STATE_STREAMING -> R.drawable.ic_thermal_streaming
-        else -> R.drawable.ic_thermal_default
+    // This function can remain if needed elsewhere, but not directly used for list item summary now
+    private fun getThermalModeString(modeState: Int): String {
+        return thermalModeStringResMap[modeState]?.let { getString(it) } ?: getString(R.string.thermal_default)
     }
-
+    
+    // ViewHolder updated for an icon instead of text summary
     private inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.app_name)
-        val mode: Spinner = view.findViewById(R.id.app_mode)
-        val icon: ImageView = view.findViewById(R.id.app_icon)
-        val stateIcon: ImageView = view.findViewById(R.id.state)
-        val touchIcon: ImageView = view.findViewById(R.id.touch)
-
-        init {
-            view.tag = this
-        }
+        val thermalModeIcon: ImageView = view.findViewById(R.id.app_thermal_icon) // Changed from app_thermal_summary
+        val icon: ImageView = view.findViewById(R.id.app_icon) // App's main icon
     }
 
-    private inner class ModeAdapter(context: Context) : BaseAdapter() {
-        private val inflater = LayoutInflater.from(context)
-        private val items = intArrayOf(
-            R.string.thermal_default,
-            R.string.thermal_benchmark,
-            R.string.thermal_browser,
-            R.string.thermal_camera,
-            R.string.thermal_dialer,
-            R.string.thermal_gaming,
-            R.string.thermal_streaming
-        )
-
-        override fun getCount() = items.size
-        override fun getItem(position: Int) = items[position]
-        override fun getItemId(position: Int) = 0L
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view = convertView as? TextView ?: inflater.inflate(
-                android.R.layout.simple_spinner_dropdown_item, parent, false
-            ) as TextView
-
-            view.apply {
-                setText(items[position])
-                textSize = 14f
-            }
-            return view
-        }
-    }
-
-    private inner class AllPackagesAdapter(context: Context) : 
-        RecyclerView.Adapter<ViewHolder>(), AdapterView.OnItemSelectedListener, SectionIndexer {
+    private inner class AllPackagesAdapter(private val context: Context) :
+        RecyclerView.Adapter<ViewHolder>(), SectionIndexer {
         
         var entries = listOf<ApplicationsState.AppEntry>()
         private var sections = emptyArray<String>()
         private var positions = intArrayOf()
 
-        init {
-            activityFilter = ActivityFilter(context.packageManager)
-        }
-
         override fun getItemCount() = entries.size
-        override fun getItemId(position: Int) = entries[position].id
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val holder = ViewHolder(
+            return ViewHolder(
                 LayoutInflater.from(parent.context)
                     .inflate(R.layout.thermal_list_item, parent, false)
             )
-            holder.mode.apply {
-                adapter = ModeAdapter(holder.itemView.context)
-                onItemSelectedListener = this@AllPackagesAdapter
-            }
-            return holder
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val entry = entries[position]
 
-            holder.touchIcon.setOnClickListener {
-                val touchSettingsFragment = TouchSettingsFragment().apply {
-                    arguments = Bundle().apply {
-                        putString("appName", entry.label)
-                        putString("packageName", entry.info.packageName)
-                    }
-                }
-                (activity as? androidx.fragment.app.FragmentActivity)?.supportFragmentManager?.beginTransaction()
-                    ?.replace(R.id.content_frame, touchSettingsFragment, "touchSettingsFragment")
-                    ?.addToBackStack(null)
-                    ?.commit()
-            }
-
-            holder.title.apply {
-                text = entry.label
-                setOnClickListener { holder.mode.performClick() }
-            }
-
+            holder.title.text = entry.label
             applicationsState.ensureIcon(entry)
             holder.icon.setImageDrawable(entry.icon)
 
-            val packageState = thermalUtils.getStateForPackage(entry.info.packageName)
-            holder.mode.apply {
-                setSelection(packageState, false)
-                tag = entry
+            val currentModeState = thermalUtils.getStateForPackage(entry.info.packageName)
+            
+            // Set the thermal mode ICON
+            val modeIconRes = thermalModeIconResMap[currentModeState]
+            if (modeIconRes != null) {
+                holder.thermalModeIcon.setImageResource(modeIconRes)
+                holder.thermalModeIcon.visibility = View.VISIBLE
+            } else {
+                // Fallback to default icon if a specific one isn't found for the state
+                holder.thermalModeIcon.setImageResource(R.drawable.ic_thermal_default) 
+                holder.thermalModeIcon.visibility = View.VISIBLE // Or View.INVISIBLE / GONE as preferred
             }
 
-            val stateIconDrawable = getStateDrawable(packageState)
-            holder.touchIcon.visibility = if (stateIconDrawable == R.drawable.ic_thermal_gaming || 
-                                             stateIconDrawable == R.drawable.ic_thermal_benchmark) {
-                View.VISIBLE
-            } else {
-                View.GONE
+            holder.itemView.setOnClickListener {
+                val packageName = entry.info.packageName
+                val appLabel = entry.label ?: entry.info.loadLabel(context.packageManager).toString()
+
+                if (packageName == null) {
+                    Log.e("ThermalSettings", "PackageName is null for ${entry.label}, cannot show dialog.")
+                    return@setOnClickListener
+                }
+
+                val modeNames = thermalModeDialogOptions.map { it.first }.toTypedArray()
+                // Need to re-fetch currentModeState here as it might be from a previous bind if view is recycled
+                val currentDialogModeState = thermalUtils.getStateForPackage(packageName) 
+                val currentModeIndex = thermalModeDialogOptions.indexOfFirst { it.second == currentDialogModeState }
+                var selectedModeIndex = currentModeIndex 
+
+                AlertDialog.Builder(context)
+                    .setTitle(getString(R.string.dialog_title_select_thermal_profile, appLabel))
+                    .setSingleChoiceItems(modeNames, currentModeIndex) { _, which ->
+                        selectedModeIndex = which
+                    }
+                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                        if (selectedModeIndex != -1 && selectedModeIndex < thermalModeDialogOptions.size) {
+                            val (_, selectedModeValue) = thermalModeDialogOptions[selectedModeIndex]
+                            val previousModeState = thermalUtils.getStateForPackage(packageName)
+                            if (previousModeState != selectedModeValue) {
+                                thermalUtils.writePackage(packageName, selectedModeValue)
+                                notifyItemChanged(holder.adapterPosition) // Crucial to update the icon
+                            }
+                        }
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
             }
-            holder.stateIcon.setImageResource(stateIconDrawable)
         }
 
         fun setEntries(entries: List<ApplicationsState.AppEntry>, sections: List<String>, positions: List<Int>) {
@@ -254,17 +261,6 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
             this.positions = positions.toIntArray()
             notifyDataSetChanged()
         }
-
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            val entry = parent?.tag as? ApplicationsState.AppEntry ?: return
-            val currentState = thermalUtils.getStateForPackage(entry.info.packageName)
-            if (currentState != position) {
-                thermalUtils.writePackage(entry.info.packageName, position)
-                notifyDataSetChanged()
-            }
-        }
-
-        override fun onNothingSelected(parent: AdapterView<*>?) {}
 
         override fun getPositionForSection(section: Int): Int {
             if (section < 0 || section >= sections.size) return -1
@@ -281,7 +277,7 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
     }
 
     private inner class ActivityFilter(private val packageManager: PackageManager) : ApplicationsState.AppFilter {
-        private val launcherResolveInfoList = mutableListOf<String>()
+        private val launcherResolveInfoList = Collections.synchronizedList(mutableListOf<String>())
 
         init {
             updateLauncherInfoList()
@@ -290,7 +286,6 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
         fun updateLauncherInfoList() {
             val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
             val resolveInfoList = packageManager.queryIntentActivities(intent, 0)
-
             synchronized(launcherResolveInfoList) {
                 launcherResolveInfoList.clear()
                 resolveInfoList.forEach { resolveInfo ->
@@ -299,16 +294,14 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
             }
         }
 
-        override fun init() {}
-
+        override fun init() {
+            updateLauncherInfoList()
+        }
+        
         override fun filterApp(entry: ApplicationsState.AppEntry): Boolean {
-            var show = !allPackagesAdapter.entries.any { it.info.packageName == entry.info.packageName }
-            if (show) {
-                synchronized(launcherResolveInfoList) {
-                    show = launcherResolveInfoList.contains(entry.info.packageName)
-                }
+            synchronized(launcherResolveInfoList) {
+                return launcherResolveInfoList.contains(entry.info.packageName)
             }
-            return show
         }
     }
 }
