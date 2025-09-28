@@ -126,11 +126,17 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
     override fun onRunningStateChanged(running: Boolean) {}
     override fun onPackageListChanged() = rebuild()
     override fun onRebuildComplete(entries: ArrayList<ApplicationsState.AppEntry>) = handleAppEntries(entries)
-    override fun onPackageIconChanged() {} 
+    override fun onPackageIconChanged() {
+        // Ensure UI updates when icons are loaded/changed
+        allPackagesAdapter.notifyDataSetChanged()
+    } 
     override fun onPackageSizeChanged(packageName: String) {}
     override fun onAllSizesComputed() {}
     override fun onLauncherInfoChanged() {}
-    override fun onLoadEntriesCompleted() {}
+    override fun onLoadEntriesCompleted() {
+        // First-time app list load completes here; trigger rebuild to apply filters
+        rebuild()
+    }
 
     private fun handleAppEntries(entries: List<ApplicationsState.AppEntry>) {
         val sections = mutableListOf<String>()
@@ -177,7 +183,9 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
     // ViewHolder updated for an icon instead of text summary
     private inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.app_name)
-        val thermalModeIcon: ImageView = view.findViewById(R.id.app_thermal_icon) // Changed from app_thermal_summary
+        // Show text summary if available in layout
+        val thermalModeText: TextView? = view.findViewById(R.id.app_thermal_summary)
+        val thermalModeIcon: ImageView? = view.findViewById(R.id.app_thermal_icon)
         val icon: ImageView = view.findViewById(R.id.app_icon) // App's main icon
     }
 
@@ -205,16 +213,23 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
             holder.icon.setImageDrawable(entry.icon)
 
             val currentModeState = thermalUtils.getStateForPackage(entry.info.packageName)
-            
-            // Set the thermal mode ICON
-            val modeIconRes = thermalModeIconResMap[currentModeState]
-            if (modeIconRes != null) {
-                holder.thermalModeIcon.setImageResource(modeIconRes)
-                holder.thermalModeIcon.visibility = View.VISIBLE
-            } else {
-                // Fallback to default icon if a specific one isn't found for the state
-                holder.thermalModeIcon.setImageResource(R.drawable.ic_thermal_default) 
-                holder.thermalModeIcon.visibility = View.VISIBLE // Or View.INVISIBLE / GONE as preferred
+
+            // Set the thermal mode TEXT if present
+            holder.thermalModeText?.let { summaryView ->
+                summaryView.text = getThermalModeString(currentModeState)
+                summaryView.visibility = View.VISIBLE
+            }
+
+            // Also set the thermal mode ICON if present
+            holder.thermalModeIcon?.let { iconView ->
+                val modeIconRes = thermalModeIconResMap[currentModeState]
+                if (modeIconRes != null) {
+                    iconView.setImageResource(modeIconRes)
+                    iconView.visibility = View.VISIBLE
+                } else {
+                    iconView.setImageResource(R.drawable.ic_thermal_default)
+                    iconView.visibility = View.VISIBLE
+                }
             }
 
             holder.itemView.setOnClickListener {
