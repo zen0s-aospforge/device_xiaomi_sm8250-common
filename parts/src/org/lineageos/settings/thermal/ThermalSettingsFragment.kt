@@ -79,8 +79,9 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
         ThermalUtils.STATE_CAMERA to R.drawable.ic_thermal_camera,
         ThermalUtils.STATE_DIALER to R.drawable.ic_thermal_dialer,
         ThermalUtils.STATE_GAMING to R.drawable.ic_thermal_gaming,
-        ThermalUtils.STATE_STREAMING to R.drawable.ic_thermal_streaming
-    )
+        ThermalUtils.STATE_STREAMING to R.drawable.ic_thermal_streaming,
+        ThermalUtils.STATE_ULTRACOOL to R.drawable.ic_thermal_ultracool
+        )
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {}
 
