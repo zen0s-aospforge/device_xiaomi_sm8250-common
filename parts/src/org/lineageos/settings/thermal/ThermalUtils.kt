@@ -38,6 +38,7 @@ class ThermalUtils(context: Context) {
         const val STATE_DIALER = 4
         const val STATE_GAMING = 5
         const val STATE_STREAMING = 6
+        const val STATE_ULTRACOOL = 7
 
         private const val THERMAL_CONTROL = "thermal_control"
         private const val THERMAL_STATE_DEFAULT = "0"
@@ -47,6 +48,7 @@ class ThermalUtils(context: Context) {
         private const val THERMAL_STATE_DIALER = "8"
         private const val THERMAL_STATE_GAMING = "9"
         private const val THERMAL_STATE_STREAMING = "14"
+        private const val THERMAL_STATE_ULTRACOOL = "52"
 
         private const val THERMAL_BENCHMARK = "thermal.benchmark="
         private const val THERMAL_BROWSER = "thermal.browser="
@@ -54,6 +56,7 @@ class ThermalUtils(context: Context) {
         private const val THERMAL_DIALER = "thermal.dialer="
         private const val THERMAL_GAMING = "thermal.gaming="
         private const val THERMAL_STREAMING = "thermal.streaming="
+        private const val THERMAL_ULTRACOOL = "thermal.ultracool="
 
         private const val THERMAL_SCONFIG = "/sys/class/thermal/thermal_message/sconfig"
 
@@ -93,11 +96,20 @@ class ThermalUtils(context: Context) {
 
         if (value != null) {
             val modes = value.split(":")
-            if (modes.size < 6) value = null  // Fix: was < 5 in Java (bug)
+            if (modes.size < 7) {
+                if (modes.size == 6) {
+                    // Migrate existing 6-mode data by appending the new ultracool bucket
+                    val migrated = value + ":" + THERMAL_ULTRACOOL
+                    writeValue(migrated)
+                    return migrated
+                } else {
+                    value = null
+                }
+            }
         }
 
         if (value.isNullOrEmpty()) {
-            value = "$THERMAL_BENCHMARK:$THERMAL_BROWSER:$THERMAL_CAMERA:$THERMAL_DIALER:$THERMAL_GAMING:$THERMAL_STREAMING"
+            value = "$THERMAL_BENCHMARK:$THERMAL_BROWSER:$THERMAL_CAMERA:$THERMAL_DIALER:$THERMAL_GAMING:$THERMAL_STREAMING:$THERMAL_ULTRACOOL"
             writeValue(value)
         }
         return value
@@ -115,6 +127,7 @@ class ThermalUtils(context: Context) {
             STATE_DIALER -> modes[3] = modes[3] + "$packageName,"
             STATE_GAMING -> modes[4] = modes[4] + "$packageName,"
             STATE_STREAMING -> modes[5] = modes[5] + "$packageName,"
+            STATE_ULTRACOOL -> modes[6] = modes[6] + "$packageName,"
         }
 
         val finalString = modes.joinToString(":")
@@ -132,6 +145,7 @@ class ThermalUtils(context: Context) {
             modes.getOrNull(3)?.contains("$packageName,") == true -> STATE_DIALER
             modes.getOrNull(4)?.contains("$packageName,") == true -> STATE_GAMING
             modes.getOrNull(5)?.contains("$packageName,") == true -> STATE_STREAMING
+            modes.getOrNull(6)?.contains("$packageName,") == true -> STATE_ULTRACOOL
             else -> STATE_DEFAULT
         }
     }
@@ -151,6 +165,7 @@ class ThermalUtils(context: Context) {
             modes.getOrNull(3)?.contains("$packageName,") == true -> THERMAL_STATE_DIALER
             modes.getOrNull(4)?.contains("$packageName,") == true -> THERMAL_STATE_GAMING
             modes.getOrNull(5)?.contains("$packageName,") == true -> THERMAL_STATE_STREAMING
+            modes.getOrNull(6)?.contains("$packageName,") == true -> THERMAL_STATE_ULTRACOOL
             else -> THERMAL_STATE_DEFAULT
         }
 
@@ -171,6 +186,7 @@ class ThermalUtils(context: Context) {
             STATE_DIALER -> THERMAL_STATE_DIALER
             STATE_GAMING -> THERMAL_STATE_GAMING
             STATE_STREAMING -> THERMAL_STATE_STREAMING
+            STATE_ULTRACOOL -> THERMAL_STATE_ULTRACOOL
             else -> THERMAL_STATE_DEFAULT
         }
 

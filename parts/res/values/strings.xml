@@ -26,6 +26,7 @@
     <string name="thermal_dialer">Dialer</string>
     <string name="thermal_gaming">Gaming</string>
     <string name="thermal_streaming">Streaming</string>
+    <string name="thermal_ultracool">Ultracool</string>
     <string name="select_thermal_profile">Select thermal profile</string>
     <string name="dialog_title_select_thermal_profile">Select thermal profile for %1$s</string>
     <string name="thermal_mode_icon_content_description">Current thermal mode</string> 

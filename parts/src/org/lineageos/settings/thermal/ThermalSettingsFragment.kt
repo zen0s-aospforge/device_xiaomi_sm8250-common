@@ -53,7 +53,8 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
         ThermalUtils.STATE_CAMERA to R.string.thermal_camera,
         ThermalUtils.STATE_DIALER to R.string.thermal_dialer,
         ThermalUtils.STATE_GAMING to R.string.thermal_gaming,
-        ThermalUtils.STATE_STREAMING to R.string.thermal_streaming
+        ThermalUtils.STATE_STREAMING to R.string.thermal_streaming,
+        ThermalUtils.STATE_ULTRACOOL to R.string.thermal_ultracool
     )
 
     // Options for the AlertDialog (text and state value)
@@ -65,7 +66,8 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
             Pair(getString(R.string.thermal_camera), ThermalUtils.STATE_CAMERA),
             Pair(getString(R.string.thermal_dialer), ThermalUtils.STATE_DIALER),
             Pair(getString(R.string.thermal_gaming), ThermalUtils.STATE_GAMING),
-            Pair(getString(R.string.thermal_streaming), ThermalUtils.STATE_STREAMING)
+            Pair(getString(R.string.thermal_streaming), ThermalUtils.STATE_STREAMING),
+            Pair(getString(R.string.thermal_ultracool), ThermalUtils.STATE_ULTRACOOL)
         )
     }
 
