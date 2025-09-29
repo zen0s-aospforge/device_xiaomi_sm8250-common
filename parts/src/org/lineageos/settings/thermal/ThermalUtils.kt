@@ -32,13 +32,13 @@ class ThermalUtils(context: Context) {
 
     companion object {
         const val STATE_DEFAULT = 0
-        const val STATE_BENCHMARK = 1
-        const val STATE_BROWSER = 2
-        const val STATE_CAMERA = 3
-        const val STATE_DIALER = 4
-        const val STATE_GAMING = 5
-        const val STATE_STREAMING = 6
-        const val STATE_ULTRACOOL = 7
+        const val STATE_ULTRACOOL = 1
+        const val STATE_STREAMING = 2
+        const val STATE_BROWSER = 3
+        const val STATE_CAMERA = 4
+        const val STATE_DIALER = 5
+        const val STATE_GAMING = 6
+        const val STATE_BENCHMARK = 7
 
         private const val THERMAL_CONTROL = "thermal_control"
         private const val THERMAL_STATE_DEFAULT = "0"
