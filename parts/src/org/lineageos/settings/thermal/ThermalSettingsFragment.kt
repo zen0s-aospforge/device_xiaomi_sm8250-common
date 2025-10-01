@@ -48,39 +48,39 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
     // Map of thermal states to their string resource IDs
     private val thermalModeStringResMap = mapOf(
         ThermalUtils.STATE_DEFAULT to R.string.thermal_default,
-        ThermalUtils.STATE_BENCHMARK to R.string.thermal_benchmark,
+        ThermalUtils.STATE_ULTRACOOL to R.string.thermal_ultracool,
+        ThermalUtils.STATE_STREAMING to R.string.thermal_streaming,
         ThermalUtils.STATE_BROWSER to R.string.thermal_browser,
         ThermalUtils.STATE_CAMERA to R.string.thermal_camera,
         ThermalUtils.STATE_DIALER to R.string.thermal_dialer,
         ThermalUtils.STATE_GAMING to R.string.thermal_gaming,
-        ThermalUtils.STATE_STREAMING to R.string.thermal_streaming,
-        ThermalUtils.STATE_ULTRACOOL to R.string.thermal_ultracool
+        ThermalUtils.STATE_BENCHMARK to R.string.thermal_benchmark
     )
 
     // Options for the AlertDialog (text and state value)
     private val thermalModeDialogOptions by lazy {
         listOf(
             Pair(getString(R.string.thermal_default), ThermalUtils.STATE_DEFAULT),
-            Pair(getString(R.string.thermal_benchmark), ThermalUtils.STATE_BENCHMARK),
+            Pair(getString(R.string.thermal_ultracool), ThermalUtils.STATE_ULTRACOOL),
+            Pair(getString(R.string.thermal_streaming), ThermalUtils.STATE_STREAMING),
             Pair(getString(R.string.thermal_browser), ThermalUtils.STATE_BROWSER),
             Pair(getString(R.string.thermal_camera), ThermalUtils.STATE_CAMERA),
             Pair(getString(R.string.thermal_dialer), ThermalUtils.STATE_DIALER),
             Pair(getString(R.string.thermal_gaming), ThermalUtils.STATE_GAMING),
-            Pair(getString(R.string.thermal_streaming), ThermalUtils.STATE_STREAMING),
-            Pair(getString(R.string.thermal_ultracool), ThermalUtils.STATE_ULTRACOOL)
+            Pair(getString(R.string.thermal_benchmark), ThermalUtils.STATE_BENCHMARK)
         )
     }
 
     // **NEW**: Map of thermal states to their icon resource IDs
     private val thermalModeIconResMap = mapOf(
         ThermalUtils.STATE_DEFAULT to R.drawable.ic_thermal_default,
-        ThermalUtils.STATE_BENCHMARK to R.drawable.ic_thermal_benchmark,
+        ThermalUtils.STATE_ULTRACOOL to R.drawable.ic_thermal_ultracool,
+        ThermalUtils.STATE_STREAMING to R.drawable.ic_thermal_streaming,
         ThermalUtils.STATE_BROWSER to R.drawable.ic_thermal_browser,
         ThermalUtils.STATE_CAMERA to R.drawable.ic_thermal_camera,
         ThermalUtils.STATE_DIALER to R.drawable.ic_thermal_dialer,
         ThermalUtils.STATE_GAMING to R.drawable.ic_thermal_gaming,
-        ThermalUtils.STATE_STREAMING to R.drawable.ic_thermal_streaming,
-        ThermalUtils.STATE_ULTRACOOL to R.drawable.ic_thermal_ultracool
+        ThermalUtils.STATE_BENCHMARK to R.drawable.ic_thermal_benchmark
         )
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {}
