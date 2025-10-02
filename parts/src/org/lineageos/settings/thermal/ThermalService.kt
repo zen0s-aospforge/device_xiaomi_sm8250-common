@@ -35,31 +35,37 @@ class ThermalService : Service() {
 
     companion object {
         private const val TAG = "ThermalService"
-        private const val DEBUG = false
+        private const val DEBUG = true
         private const val SETTINGS_GAME_LIST = "gamespace_game_list"
+    }
+
+    private fun logDebug(message: String) {
+        if (DEBUG) Log.d(TAG, message)
     }
 
     private var previousApp: String = ""
     private lateinit var thermalUtils: ThermalUtils
     private var activityTaskManager: IActivityTaskManager? = null
+    private var isTaskListenerRegistered = false
 
     private val intentReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            previousApp = ""
-            thermalUtils.setDefaultThermalProfile()
-            thermalUtils.resetTouchModes()
+            when (intent.action) {
+                Intent.ACTION_SCREEN_OFF -> {
+                    handleScreenOff()
+                }
+                Intent.ACTION_SCREEN_ON -> {
+                    handleScreenOn()
+                }
+            }
         }
     }
 
     override fun onCreate() {
-        if (DEBUG) Log.d(TAG, "Creating service")
+    logDebug("Creating service")
         
-        try {
-            activityTaskManager = ActivityTaskManager.getService()
-            activityTaskManager?.registerTaskStackListener(taskListener)
-        } catch (e: RemoteException) {
-            // Do nothing
-        }
+        activityTaskManager = ActivityTaskManager.getService()
+        registerTaskListener()
         
         thermalUtils = ThermalUtils(this)
         registerReceiver()
@@ -67,7 +73,7 @@ class ThermalService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (DEBUG) Log.d(TAG, "Starting service")
+        logDebug("Starting service")
         if (!thermalUtils.isEnabled()) {
             stopSelf()
             return START_NOT_STICKY
@@ -80,6 +86,12 @@ class ThermalService : Service() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         thermalUtils.updateTouchRotation()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(intentReceiver)
+        unregisterTaskListener()
     }
 
     private fun registerReceiver() {
@@ -113,22 +125,78 @@ class ThermalService : Service() {
 
     private val taskListener = object : TaskStackListener() {
         override fun onTaskStackChanged() {
-            try {
-                val info = activityTaskManager?.focusedRootTaskInfo
-                val topActivity = info?.topActivity ?: return
+            applyThermalForForegroundApp()
+        }
+    }
 
-                val foregroundApp = topActivity.packageName
-                if (foregroundApp != previousApp) {
-                    if (!isConfigured(foregroundApp) && isListedOnGameSpace(foregroundApp)) {
-                        thermalUtils.setThermalProfileForce(ThermalUtils.STATE_GAMING)
-                    } else {
-                        thermalUtils.setThermalProfile(foregroundApp)
-                    }
-                    previousApp = foregroundApp
-                }
-            } catch (e: Exception) {
-                // Catch all exceptions to prevent service crashes
+    private fun applyThermalForForegroundApp() {
+        try {
+            val info: RootTaskInfo = activityTaskManager?.focusedRootTaskInfo ?: run {
+                logDebug("No focused root task info available")
+                return
             }
+            val foregroundApp = info.topActivity?.packageName ?: run {
+                logDebug("Focused task missing package name")
+                return
+            }
+            logDebug("Foreground app detected: $foregroundApp")
+            handleForegroundPackage(foregroundApp)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to apply thermal profile", e)
+        }
+    }
+
+    private fun handleForegroundPackage(packageName: String) {
+        if (packageName == previousApp) {
+            logDebug("Package $packageName already handled, skipping")
+            return
+        }
+
+        if (!isConfigured(packageName) && isListedOnGameSpace(packageName)) {
+            logDebug("$packageName listed in GameSpace without profile, forcing gaming state")
+            thermalUtils.setThermalProfileForce(ThermalUtils.STATE_GAMING)
+        } else {
+            logDebug("Applying configured thermal profile for $packageName")
+            thermalUtils.setThermalProfile(packageName)
+        }
+        previousApp = packageName
+    }
+
+    private fun handleScreenOff() {
+        logDebug("Screen off received - resetting thermal state and pausing monitoring")
+        previousApp = ""
+        thermalUtils.setDefaultThermalProfile()
+        thermalUtils.resetTouchModes()
+        unregisterTaskListener()
+    }
+
+    private fun handleScreenOn() {
+        logDebug("Screen on received - resuming monitoring")
+        previousApp = ""
+        registerTaskListener()
+        applyThermalForForegroundApp()
+    }
+
+    private fun registerTaskListener() {
+        if (isTaskListenerRegistered) return
+        try {
+            activityTaskManager?.registerTaskStackListener(taskListener)
+            isTaskListenerRegistered = true
+            logDebug("Task stack listener registered")
+        } catch (e: RemoteException) {
+            Log.w(TAG, "Failed to register task stack listener", e)
+        }
+    }
+
+    private fun unregisterTaskListener() {
+        if (!isTaskListenerRegistered) return
+        try {
+            activityTaskManager?.unregisterTaskStackListener(taskListener)
+        } catch (e: RemoteException) {
+            Log.w(TAG, "Failed to unregister task stack listener", e)
+        } finally {
+            isTaskListenerRegistered = false
+            logDebug("Task stack listener unregistered")
         }
     }
 }

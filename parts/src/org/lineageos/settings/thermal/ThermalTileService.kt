@@ -34,6 +34,10 @@ class ThermalTileService : TileService() {
     private val updateInProgress = AtomicBoolean(false)
     private val mainHandler = Handler(Looper.getMainLooper())
 
+    private fun logDebug(message: String) {
+        if (DEBUG) Log.d(TAG, message)
+    }
+
     override fun onCreate() {
         super.onCreate()
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -49,7 +53,9 @@ class ThermalTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
+        logDebug("Tile start listening")
         if (sharedPrefs.getBoolean(THERMAL_ENABLED_KEY, true)) {
+            logDebug("Thermal feature disabled via prefs - tile unavailable")
             updateTileDisabled()
             return
         }
@@ -59,12 +65,14 @@ class ThermalTileService : TileService() {
             currentMode = MODE_DEFAULT
             setThermalMode(currentMode)
         }
+        logDebug("Tile listening with mode: ${modeLabel(currentMode)}")
         updateTile()
     }
 
     override fun onClick() {
         super.onClick()
         if (sharedPrefs.getBoolean(THERMAL_ENABLED_KEY, true)) {
+            logDebug("Tile click ignored - thermal feature disabled")
             return
         }
         toggleThermalMode()
@@ -72,7 +80,7 @@ class ThermalTileService : TileService() {
 
     private fun toggleThermalMode() {
         if (!updateInProgress.compareAndSet(false, true)) {
-            Log.d(TAG, "Thermal mode change already in progress, ignoring tap")
+            logDebug("Thermal mode change already in progress, ignoring tap")
             return
         }
 
@@ -81,6 +89,7 @@ class ThermalTileService : TileService() {
             else -> (currentMode + 1) % 3
         }
 
+        logDebug("Tile tapped - switching to ${modeLabel(nextMode)}")
         currentMode = nextMode
         updateTile()
 
@@ -89,11 +98,15 @@ class ThermalTileService : TileService() {
                 setThermalMode(nextMode)
                 val refreshedMode = getCurrentThermalMode()
                 if (refreshedMode != MODE_UNKNOWN) {
+                    logDebug("Thermal node now reports ${modeLabel(refreshedMode)}")
                     currentMode = refreshedMode
                 }
             } finally {
                 updateInProgress.set(false)
-                mainHandler.post { updateTile() }
+                mainHandler.post {
+                    logDebug("Tile refresh after background write - ${modeLabel(currentMode)}")
+                    updateTile()
+                }
             }
         }
     }
@@ -118,7 +131,7 @@ class ThermalTileService : TileService() {
         }
 
         val success = FileUtils.writeLine(THERMAL_SCONFIG, thermalValue.toString())
-        Log.d(TAG, "Thermal mode changed to ${modeLabel(mode)}: $success")
+        logDebug("Requested thermal mode ${modeLabel(mode)} (${thermalValue}) success=$success")
 
         when (mode) {
             MODE_PERFORMANCE -> {
@@ -144,15 +157,16 @@ class ThermalTileService : TileService() {
         val isBatterySaverEnabled = powerManager.isPowerSaveMode
         if (enable && !isBatterySaverEnabled) {
             powerManager.setPowerSaveModeEnabled(true)
-            Log.d(TAG, "Battery Saver mode enabled")
+            logDebug("Battery Saver mode enabled")
         } else if (!enable && isBatterySaverEnabled) {
             powerManager.setPowerSaveModeEnabled(false)
-            Log.d(TAG, "Battery Saver mode disabled")
+            logDebug("Battery Saver mode disabled")
         }
     }
 
     private fun updateTile() {
         val tile = qsTile ?: return
+        logDebug("Updating tile visuals to ${modeLabel(currentMode)}")
         when (currentMode) {
             MODE_PERFORMANCE -> {
                 tile.state = Tile.STATE_ACTIVE
@@ -214,7 +228,7 @@ class ThermalTileService : TileService() {
 
     private fun setPerformanceModeActive(mode: Int) {
         SystemProperties.set(SYS_PROP, mode.toString())
-        Log.d(TAG, "Performance mode active set to: $mode")
+        logDebug("Performance mode active set to: $mode")
     }
 
     private fun registerBatterySaverObserver() {
@@ -228,7 +242,7 @@ class ThermalTileService : TileService() {
                 ) == 1
 
                 if (isBatterySaverOn && (currentMode == MODE_DEFAULT || currentMode == MODE_PERFORMANCE)) {
-                    Log.d(TAG, "Battery saver enabled, switching to battery saver thermal mode")
+                    logDebug("Battery saver enabled, switching to battery saver thermal mode")
                     currentMode = MODE_BATTERY_SAVER
                     setThermalMode(currentMode)
                     updateTile()
@@ -257,10 +271,12 @@ class ThermalTileService : TileService() {
         batterySaverObserver?.let { contentResolver.unregisterContentObserver(it) }
         cancelPerformanceNotification()
         tileExecutor.shutdownNow()
+        logDebug("Tile service destroyed")
     }
 
     companion object {
         private const val TAG = "ThermalTileService"
+        private const val DEBUG = true
         private const val THERMAL_SCONFIG = "/sys/class/thermal/thermal_message/sconfig"
         private const val THERMAL_ENABLED_KEY = "thermal_enabled"
         private const val SYS_PROP = "sys.perf_mode_active"
