@@ -81,7 +81,7 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
     // **NEW**: Map of thermal states to their icon resource IDs
     private val thermalModeIconResMap = mapOf(
         ThermalUtils.STATE_DEFAULT to R.drawable.ic_thermal_default,
-        ThermalUtils.STATE_ULTRACOOL to R.drawable.ic_thermal_ultracool,
+    ThermalUtils.STATE_ULTRACOOL to R.drawable.ic_thermal_battery_saver,
         ThermalUtils.STATE_STREAMING to R.drawable.ic_thermal_streaming,
         ThermalUtils.STATE_BROWSER to R.drawable.ic_thermal_browser,
         ThermalUtils.STATE_CAMERA to R.drawable.ic_thermal_camera,
