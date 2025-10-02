@@ -14,12 +14,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>    
+<resources>
 
-    <!-- Thermal Profiles -->
-    <string name="thermal_title">Thermal Profiles</string>
-    <string name="thermal_summary">Adjust per-app thermal profiles for optimum performance</string>
-    <string name="thermal_default">Default</string>
+     <!-- Thermal Profiles -->
+     <string name="thermal_title">Thermal Profiles</string>
+     <string name="thermal_summary">Adjust per-app thermal profiles for optimum performance</string>
+     <string name="thermal_enable">Use thermal profiles</string>
+     <string name="thermal_default">Default</string>
     <string name="thermal_benchmark">Benchmark</string>
     <string name="thermal_browser">Browser</string>
     <string name="thermal_camera">Camera</string>
@@ -29,7 +30,17 @@
     <string name="thermal_ultracool">Ultracool</string>
     <string name="select_thermal_profile">Select thermal profile</string>
     <string name="dialog_title_select_thermal_profile">Select thermal profile for %1$s</string>
-    <string name="thermal_mode_icon_content_description">Current thermal mode</string> 
+     <string name="thermal_mode_icon_content_description">Current thermal mode</string>
+
+     <!-- Thermal quick settings tile -->
+     <string name="thermal_tile_label">Thermal Profile</string>
+     <string name="thermal_mode_default">Default Mode</string>
+     <string name="thermal_mode_performance">Performance Mode</string>
+     <string name="thermal_mode_battery_saver">Battery Saver Mode</string>
+     <string name="thermal_mode_unknown">Unknown Mode</string>
+     <string name="thermal_tile_disabled_subtitle">Disabled (Per-app thermal profiles enabled)</string>
+     <string name="perf_mode_title">High Performance Mode</string>
+     <string name="perf_mode_notification">High Performance Mode is now activated for enhanced performance.</string>
 
     <!-- Refresh Rate Settings -->
     <string name="refresh_rate_tile_title">Refresh Rate</string>

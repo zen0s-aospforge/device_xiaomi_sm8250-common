@@ -68,6 +68,10 @@ class ThermalService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (DEBUG) Log.d(TAG, "Starting service")
+        if (!thermalUtils.isEnabled()) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
         return START_STICKY
     }
 

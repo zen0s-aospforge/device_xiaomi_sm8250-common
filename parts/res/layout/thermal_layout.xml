@@ -11,8 +11,28 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<androidx.recyclerview.widget.RecyclerView
+<LinearLayout
      xmlns:android="http://schemas.android.com/apk/res/android"
-     android:id="@+id/thermal_rv_view"
      android:layout_width="match_parent"
-     android:layout_height="wrap_content" />
+     android:layout_height="match_parent"
+     android:orientation="vertical">
+
+     <FrameLayout
+          android:id="@+id/preference_container"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content" />
+
+     <View
+          android:id="@+id/thermal_list_divider"
+          android:layout_width="match_parent"
+          android:layout_height="1dp"
+          android:visibility="gone" />
+
+     <androidx.recyclerview.widget.RecyclerView
+          android:id="@+id/thermal_rv_view"
+          android:layout_width="match_parent"
+          android:layout_height="0dp"
+          android:layout_weight="1"
+          android:clipToPadding="false" />
+
+</LinearLayout>

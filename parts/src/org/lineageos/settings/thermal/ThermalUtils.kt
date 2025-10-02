@@ -30,6 +30,13 @@ import vendor.xiaomi.hardware.touchfeature.V1_0.ITouchFeature
 
 class ThermalUtils(context: Context) {
 
+    private val appContext: Context = context.applicationContext
+    private val sharedPrefs: SharedPreferences
+    private val display: Display
+    private val touchFeature: ITouchFeature?
+    private val serviceIntent: Intent
+    private var enabledCache: Boolean
+
     companion object {
         const val STATE_DEFAULT = 0
         const val STATE_ULTRACOOL = 1
@@ -41,6 +48,7 @@ class ThermalUtils(context: Context) {
         const val STATE_BENCHMARK = 7
 
         private const val THERMAL_CONTROL = "thermal_control"
+        private const val THERMAL_ENABLED = "thermal_enabled"
         private const val THERMAL_STATE_DEFAULT = "0"
         private const val THERMAL_STATE_BENCHMARK = "10"
         private const val THERMAL_STATE_BROWSER = "11"
@@ -62,21 +70,18 @@ class ThermalUtils(context: Context) {
 
         @JvmStatic
         fun startService(context: Context) {
-            if (FileUtils.fileExists(THERMAL_SCONFIG)) {
-                context.startServiceAsUser(Intent(context, ThermalService::class.java), UserHandle.CURRENT)
-            }
+            ThermalUtils(context).startServiceIfEnabled()
         }
     }
 
     private var touchModeChanged = false
-    private val display: Display
-    private val touchFeature: ITouchFeature?
-    private val sharedPrefs: SharedPreferences
 
     init {
-        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
-        
-        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(appContext)
+        enabledCache = sharedPrefs.getBoolean(THERMAL_ENABLED, true)
+        serviceIntent = Intent(appContext, ThermalService::class.java)
+
+        val windowManager = appContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         display = windowManager.defaultDisplay
 
         touchFeature = try {
@@ -85,6 +90,53 @@ class ThermalUtils(context: Context) {
             // RemoteException or NoSuchElementException
             null
         }
+    }
+
+    fun isEnabled(): Boolean = enabledCache
+
+    fun setEnabled(enabled: Boolean) {
+        if (enabledCache == enabled) return
+        enabledCache = enabled
+        sharedPrefs.edit().putBoolean(THERMAL_ENABLED, enabled).apply()
+        if (enabled) {
+            startServiceIfEnabled()
+        } else {
+            clearConfiguredPackages()
+            setDefaultThermalProfile()
+            resetTouchModes()
+            stopServiceInternal()
+        }
+    }
+
+    private fun clearConfiguredPackages() {
+        val modes = listOf(
+            THERMAL_BENCHMARK,
+            THERMAL_BROWSER,
+            THERMAL_CAMERA,
+            THERMAL_DIALER,
+            THERMAL_GAMING,
+            THERMAL_STREAMING,
+            THERMAL_ULTRACOOL
+        )
+
+        val clearedValue = modes.joinToString(":")
+        writeValue(clearedValue)
+    }
+
+    fun startServiceIfEnabled() {
+        if (!enabledCache) {
+            stopServiceInternal()
+            return
+        }
+        if (!FileUtils.fileExists(THERMAL_SCONFIG)) {
+            stopServiceInternal()
+            return
+        }
+        appContext.startServiceAsUser(serviceIntent, UserHandle.CURRENT)
+    }
+
+    private fun stopServiceInternal() {
+        appContext.stopService(serviceIntent)
     }
 
     private fun writeValue(profiles: String) {
@@ -151,10 +203,16 @@ class ThermalUtils(context: Context) {
     }
 
     fun setDefaultThermalProfile() {
-        FileUtils.writeLine(THERMAL_SCONFIG, THERMAL_STATE_DEFAULT)
+        if (FileUtils.fileExists(THERMAL_SCONFIG)) {
+            FileUtils.writeLine(THERMAL_SCONFIG, THERMAL_STATE_DEFAULT)
+        }
     }
 
     fun setThermalProfile(packageName: String) {
+        if (!enabledCache || !FileUtils.fileExists(THERMAL_SCONFIG)) {
+            setDefaultThermalProfile()
+            return
+        }
         val value = getValue()
         val modes = value.split(":")
 
@@ -179,6 +237,9 @@ class ThermalUtils(context: Context) {
     }
 
     fun setThermalProfileForce(mode: Int) {
+        if (!FileUtils.fileExists(THERMAL_SCONFIG)) {
+            return
+        }
         val state = when (mode) {
             STATE_BENCHMARK -> THERMAL_STATE_BENCHMARK
             STATE_BROWSER -> THERMAL_STATE_BROWSER

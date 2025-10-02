@@ -32,10 +32,15 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.settingslib.applications.ApplicationsState
+import com.android.settingslib.widget.MainSwitchPreference
 import org.lineageos.settings.R
 import java.util.*
 
 class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Callbacks {
+
+    private companion object {
+        private const val THERMAL_ENABLE_KEY = "thermal_enable"
+    }
 
     private lateinit var allPackagesAdapter: AllPackagesAdapter
     private lateinit var applicationsState: ApplicationsState
@@ -43,7 +48,9 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
     private lateinit var activityFilter: ActivityFilter
     private val entryMap = mutableMapOf<String, ApplicationsState.AppEntry>()
     private lateinit var appsRecyclerView: RecyclerView
+    private lateinit var listDivider: View
     private lateinit var thermalUtils: ThermalUtils
+    private lateinit var mainSwitch: MainSwitchPreference
 
     // Map of thermal states to their string resource IDs
     private val thermalModeStringResMap = mapOf(
@@ -83,7 +90,9 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
         ThermalUtils.STATE_BENCHMARK to R.drawable.ic_thermal_benchmark
         )
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {}
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        setPreferencesFromResource(R.xml.thermal_settings, rootKey)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,7 +106,19 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.thermal_layout, container, false)
+        val root = inflater.inflate(R.layout.thermal_layout, container, false)
+        val preferenceContainer = root.findViewById<ViewGroup>(R.id.preference_container)
+        val preferenceView = super.onCreateView(inflater, preferenceContainer, savedInstanceState)
+
+        if (preferenceView != null) {
+            val parent = preferenceView.parent as? ViewGroup
+            parent?.removeView(preferenceView)
+            preferenceContainer.addView(preferenceView)
+        } else {
+            Log.w("ThermalSettings", "Preference view was null, thermal switch UI may be missing")
+        }
+
+        return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -107,6 +128,19 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
             layoutManager = LinearLayoutManager(requireActivity())
             adapter = allPackagesAdapter
         }
+
+        listDivider = view.findViewById(R.id.thermal_list_divider)
+
+        mainSwitch = findPreference<MainSwitchPreference>(THERMAL_ENABLE_KEY)
+            ?: throw IllegalStateException("Missing thermal master switch preference")
+
+        mainSwitch.isChecked = thermalUtils.isEnabled()
+        mainSwitch.addOnSwitchChangeListener { _, isChecked ->
+            thermalUtils.setEnabled(isChecked)
+            updateListVisibility(isChecked)
+        }
+
+        updateListVisibility(mainSwitch.isChecked)
     }
 
     override fun onDestroy() {
@@ -116,6 +150,8 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
 
     override fun onResume() {
         super.onResume()
+        mainSwitch.isChecked = thermalUtils.isEnabled()
+        updateListVisibility(mainSwitch.isChecked)
         session.onResume()
         rebuild()
         allPackagesAdapter.notifyDataSetChanged()
@@ -139,6 +175,11 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
     override fun onLoadEntriesCompleted() {
         // First-time app list load completes here; trigger rebuild to apply filters
         rebuild()
+    }
+
+    private fun updateListVisibility(enabled: Boolean) {
+        appsRecyclerView.visibility = if (enabled) View.VISIBLE else View.GONE
+        listDivider.visibility = if (enabled) View.VISIBLE else View.GONE
     }
 
     private fun handleAppEntries(entries: List<ApplicationsState.AppEntry>) {
