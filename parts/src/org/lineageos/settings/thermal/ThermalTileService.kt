@@ -33,6 +33,11 @@ class ThermalTileService : TileService() {
     private val pendingLock = Any()
     @Volatile private var pendingMode: Int = MODE_PENDING_NONE
     private val applyRunnable = Runnable { flushPendingMode() }
+    private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == THERMAL_ENABLED_KEY) {
+            mainHandler.post { handleThermalProfilesChanged() }
+        }
+    }
 
     private fun logDebug(message: String) {
         if (DEBUG) Log.d(TAG, message)
@@ -46,6 +51,7 @@ class ThermalTileService : TileService() {
         if (!sharedPrefs.contains(THERMAL_ENABLED_KEY)) {
             sharedPrefs.edit().putBoolean(THERMAL_ENABLED_KEY, true).apply()
         }
+        sharedPrefs.registerOnSharedPreferenceChangeListener(prefsListener)
         setupNotificationChannel()
         registerBatterySaverObserver()
     }
@@ -53,8 +59,9 @@ class ThermalTileService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
         logDebug("Tile start listening")
-        if (!sharedPrefs.getBoolean(THERMAL_ENABLED_KEY, true)) {
-            logDebug("Thermal feature disabled via prefs - tile unavailable")
+        if (isThermalProfilesEnabled()) {
+            logDebug("Thermal profiles enabled - QS tile unavailable")
+            cancelPendingModeApply()
             updateTileDisabled()
             return
         }
@@ -74,7 +81,7 @@ class ThermalTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
-        if (!sharedPrefs.getBoolean(THERMAL_ENABLED_KEY, true)) {
+        if (isThermalProfilesEnabled()) {
             logDebug("Tile click ignored - thermal feature disabled")
             return
         }
@@ -105,6 +112,10 @@ class ThermalTileService : TileService() {
     }
 
     private fun scheduleModeApply(mode: Int, immediate: Boolean = false) {
+        if (isThermalProfilesEnabled()) {
+            logDebug("Skipping apply for ${modeLabel(mode)} because thermal profiles are enabled")
+            return
+        }
         synchronized(pendingLock) {
             pendingMode = mode
             mainHandler.removeCallbacks(applyRunnable)
@@ -183,6 +194,36 @@ class ThermalTileService : TileService() {
         } else {
             cancelPerformanceNotification()
         }
+    }
+
+    private fun isThermalProfilesEnabled(): Boolean =
+        sharedPrefs.getBoolean(THERMAL_ENABLED_KEY, true)
+
+    private fun cancelPendingModeApply() {
+        synchronized(pendingLock) {
+            pendingMode = MODE_PENDING_NONE
+            mainHandler.removeCallbacks(applyRunnable)
+        }
+    }
+
+    private fun handleThermalProfilesChanged() {
+        val enabled = isThermalProfilesEnabled()
+        logDebug("Thermal profiles changed, enabled=$enabled")
+        if (enabled) {
+            cancelPendingModeApply()
+            updateTileDisabled()
+            return
+        }
+
+        val detectedMode = getCurrentThermalMode()
+        currentMode = if (detectedMode == MODE_UNKNOWN) {
+            logDebug("Thermal profiles disabled, resetting thermal mode to default")
+            scheduleModeApply(MODE_DEFAULT, immediate = true)
+            MODE_DEFAULT
+        } else {
+            detectedMode
+        }
+        updateTile()
     }
 
     private fun updateTile() {
@@ -292,6 +333,7 @@ class ThermalTileService : TileService() {
         batterySaverObserver?.let { contentResolver.unregisterContentObserver(it) }
         cancelPerformanceNotification()
         mainHandler.removeCallbacks(applyRunnable)
+        sharedPrefs.unregisterOnSharedPreferenceChangeListener(prefsListener)
         tileExecutor.shutdownNow()
         logDebug("Tile service destroyed")
     }
