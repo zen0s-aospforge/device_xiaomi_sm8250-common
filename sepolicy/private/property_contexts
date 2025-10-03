@@ -12,3 +12,6 @@ ro.product.marketname                                                           
 
 # SettingsLib
 settingsdebug.instant.packages u:object_r:settingslib_prop:s0
+
+# Thermal tile performance state
+sys.perf_mode_active u:object_r:perf_mode_prop:s0

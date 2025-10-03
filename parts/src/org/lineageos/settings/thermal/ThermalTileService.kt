@@ -244,8 +244,12 @@ class ThermalTileService : TileService() {
     }
 
     private fun setPerformanceModeActive(mode: Int) {
-        SystemProperties.set(SYS_PROP, mode.toString())
-        logDebug("Performance mode active set to: $mode")
+        try {
+            SystemProperties.set(SYS_PROP, mode.toString())
+            logDebug("Performance mode active set to: $mode")
+        } catch (e: SecurityException) {
+            Log.w(TAG, "Unable to set $SYS_PROP", e)
+        }
     }
 
     private fun registerBatterySaverObserver() {
