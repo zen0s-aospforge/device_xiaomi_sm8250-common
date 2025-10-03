@@ -1,2 +1,5 @@
 # SettingsLib
 system_public_prop(settingslib_prop)
+
+# Thermal tile
+system_public_prop(perf_mode_prop)
