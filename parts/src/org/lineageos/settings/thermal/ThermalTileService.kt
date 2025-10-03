@@ -33,6 +33,7 @@ class ThermalTileService : TileService() {
     private val pendingLock = Any()
     @Volatile private var pendingMode: Int = MODE_PENDING_NONE
     private val applyRunnable = Runnable { flushPendingMode() }
+    @Volatile private var batterySaverForced = false
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key == THERMAL_ENABLED_KEY) {
             mainHandler.post { handleThermalProfilesChanged() }
@@ -143,10 +144,22 @@ class ThermalTileService : TileService() {
     }
 
     private fun applyThermalMode(requestedMode: Int) {
+        if (isThermalProfilesEnabled()) {
+            logDebug("Aborting apply for ${modeLabel(requestedMode)} - thermal profiles enabled")
+            mainHandler.post { updateTileDisabled() }
+            return
+        }
+
         val nodeValue = when (requestedMode) {
             MODE_BATTERY_SAVER -> THERMAL_VALUE_BATTERY_SAVER
             MODE_PERFORMANCE -> THERMAL_VALUE_PERFORMANCE
             else -> THERMAL_VALUE_DEFAULT
+        }
+
+        if (isThermalProfilesEnabled()) {
+            logDebug("Aborting apply for ${modeLabel(requestedMode)} after mode resolution - thermal profiles enabled")
+            mainHandler.post { updateTileDisabled() }
+            return
         }
 
         logDebug("Applying thermal mode ${modeLabel(requestedMode)} ($nodeValue)")
@@ -156,10 +169,23 @@ class ThermalTileService : TileService() {
         if (success) {
             setPerformanceModeActive(requestedMode)
             handlePerformanceNotification(requestedMode)
-            enableBatterySaver(requestedMode == MODE_BATTERY_SAVER)
+            if (requestedMode == MODE_BATTERY_SAVER) {
+                if (enableBatterySaver(true) || batterySaverForced) {
+                    batterySaverForced = true
+                }
+            } else if (batterySaverForced) {
+                enableBatterySaver(false)
+                batterySaverForced = false
+            }
         }
 
         mainHandler.post {
+            if (isThermalProfilesEnabled()) {
+                logDebug("Thermal profiles enabled after apply - forcing tile unavailable state")
+                updateTileDisabled()
+                return@post
+            }
+
             if (success) {
                 currentMode = requestedMode
                 logDebug("Thermal mode ${modeLabel(currentMode)} applied, refreshing tile")
@@ -176,15 +202,27 @@ class ThermalTileService : TileService() {
         }
     }
 
-    private fun enableBatterySaver(enable: Boolean) {
-        val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return
+    private fun enableBatterySaver(enable: Boolean): Boolean {
+        val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return false
         val isBatterySaverEnabled = powerManager.isPowerSaveMode
-        if (enable && !isBatterySaverEnabled) {
-            powerManager.setPowerSaveModeEnabled(true)
-            logDebug("Battery Saver mode enabled")
-        } else if (!enable && isBatterySaverEnabled) {
-            powerManager.setPowerSaveModeEnabled(false)
-            logDebug("Battery Saver mode disabled")
+        return if (enable) {
+            if (!isBatterySaverEnabled) {
+                powerManager.setPowerSaveModeEnabled(true)
+                logDebug("Battery Saver mode enabled")
+                true
+            } else {
+                logDebug("Battery Saver already enabled")
+                false
+            }
+        } else {
+            if (batterySaverForced && isBatterySaverEnabled) {
+                powerManager.setPowerSaveModeEnabled(false)
+                logDebug("Battery Saver mode disabled")
+                true
+            } else {
+                logDebug("Battery Saver state left unchanged")
+                false
+            }
         }
     }
 
@@ -211,6 +249,13 @@ class ThermalTileService : TileService() {
         logDebug("Thermal profiles changed, enabled=$enabled")
         if (enabled) {
             cancelPendingModeApply()
+            setPerformanceModeActive(MODE_DEFAULT)
+            handlePerformanceNotification(MODE_DEFAULT)
+            if (batterySaverForced) {
+                enableBatterySaver(false)
+                batterySaverForced = false
+            }
+            currentMode = MODE_DEFAULT
             updateTileDisabled()
             return
         }
@@ -249,7 +294,9 @@ class ThermalTileService : TileService() {
         tile.state = Tile.STATE_UNAVAILABLE
         tile.icon = Icon.createWithResource(this, R.drawable.ic_thermal_default)
         tile.label = getString(R.string.thermal_tile_label)
-        tile.subtitle = getString(R.string.thermal_tile_disabled_subtitle)
+        val subtitle = getString(R.string.thermal_tile_disabled_subtitle)
+        tile.subtitle = subtitle
+        tile.stateDescription = subtitle
         tile.updateTile()
     }
 
@@ -297,6 +344,10 @@ class ThermalTileService : TileService() {
         val observer = object : ContentObserver(mainHandler) {
             override fun onChange(selfChange: Boolean) {
                 super.onChange(selfChange)
+                if (isThermalProfilesEnabled()) {
+                    logDebug("Battery saver change ignored while thermal profiles enabled")
+                    return
+                }
                 val isBatterySaverOn = Settings.Global.getInt(
                     contentResolver,
                     Settings.Global.LOW_POWER_MODE,
