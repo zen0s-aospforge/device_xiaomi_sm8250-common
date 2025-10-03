@@ -33,7 +33,6 @@ class ThermalTileService : TileService() {
     private val pendingLock = Any()
     @Volatile private var pendingMode: Int = MODE_PENDING_NONE
     private val applyRunnable = Runnable { flushPendingMode() }
-    @Volatile private var batterySaverForced = false
     private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key == THERMAL_ENABLED_KEY) {
             mainHandler.post { handleThermalProfilesChanged() }
@@ -74,6 +73,18 @@ class ThermalTileService : TileService() {
             MODE_DEFAULT
         } else {
             detectedMode
+        }
+
+        // Sync with system Battery Saver state
+        val isBatterySaverOn = Settings.Global.getInt(
+            contentResolver,
+            Settings.Global.LOW_POWER_MODE,
+            0
+        ) == 1
+        if (isBatterySaverOn && currentMode != MODE_BATTERY_SAVER) {
+            logDebug("System Battery Saver is on, syncing to Battery Saver thermal mode")
+            currentMode = MODE_BATTERY_SAVER
+            scheduleModeApply(MODE_BATTERY_SAVER, immediate = true)
         }
 
         logDebug("Tile listening with mode: ${modeLabel(currentMode)}")
@@ -169,14 +180,6 @@ class ThermalTileService : TileService() {
         if (success) {
             setPerformanceModeActive(requestedMode)
             handlePerformanceNotification(requestedMode)
-            if (requestedMode == MODE_BATTERY_SAVER) {
-                if (enableBatterySaver(true) || batterySaverForced) {
-                    batterySaverForced = true
-                }
-            } else if (batterySaverForced) {
-                enableBatterySaver(false)
-                batterySaverForced = false
-            }
         }
 
         mainHandler.post {
@@ -199,30 +202,6 @@ class ThermalTileService : TileService() {
                 }
             }
             updateTile()
-        }
-    }
-
-    private fun enableBatterySaver(enable: Boolean): Boolean {
-        val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return false
-        val isBatterySaverEnabled = powerManager.isPowerSaveMode
-        return if (enable) {
-            if (!isBatterySaverEnabled) {
-                powerManager.setPowerSaveModeEnabled(true)
-                logDebug("Battery Saver mode enabled")
-                true
-            } else {
-                logDebug("Battery Saver already enabled")
-                false
-            }
-        } else {
-            if (batterySaverForced && isBatterySaverEnabled) {
-                powerManager.setPowerSaveModeEnabled(false)
-                logDebug("Battery Saver mode disabled")
-                true
-            } else {
-                logDebug("Battery Saver state left unchanged")
-                false
-            }
         }
     }
 
@@ -251,10 +230,6 @@ class ThermalTileService : TileService() {
             cancelPendingModeApply()
             setPerformanceModeActive(MODE_DEFAULT)
             handlePerformanceNotification(MODE_DEFAULT)
-            if (batterySaverForced) {
-                enableBatterySaver(false)
-                batterySaverForced = false
-            }
             currentMode = MODE_DEFAULT
             updateTileDisabled()
             return
@@ -355,10 +330,15 @@ class ThermalTileService : TileService() {
                 ) == 1
 
                 if (isBatterySaverOn && currentMode != MODE_BATTERY_SAVER) {
-                    logDebug("Battery saver enabled, switching to battery saver thermal mode")
+                    logDebug("System Battery Saver enabled, switching to Battery Saver thermal mode")
                     currentMode = MODE_BATTERY_SAVER
                     updateTile()
                     scheduleModeApply(MODE_BATTERY_SAVER)
+                } else if (!isBatterySaverOn && currentMode == MODE_BATTERY_SAVER) {
+                    logDebug("System Battery Saver disabled, restoring Default thermal mode")
+                    currentMode = MODE_DEFAULT
+                    updateTile()
+                    scheduleModeApply(MODE_DEFAULT)
                 }
             }
         }
