@@ -291,7 +291,7 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
                 val currentModeIndex = thermalModeDialogOptions.indexOfFirst { it.second == currentDialogModeState }
                 var selectedModeIndex = currentModeIndex 
 
-                AlertDialog.Builder(context)
+                val alertDialog = AlertDialog.Builder(context)
                     .setTitle(getString(R.string.dialog_title_select_thermal_profile, appLabel))
                     .setSingleChoiceItems(modeNames, currentModeIndex) { _, which ->
                         selectedModeIndex = which
@@ -307,10 +307,41 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
                         }
                         dialog.dismiss()
                     }
+                    .setNeutralButton(R.string.button_adjust_touch) { dialog, _ ->
+                        // Launch TouchSettingsFragment for this app
+                        val bundle = Bundle().apply {
+                            putString("packageName", packageName)
+                            putString("appName", appLabel)
+                        }
+                        val touchFragment = TouchSettingsFragment().apply {
+                            arguments = bundle
+                        }
+                        
+                        parentFragmentManager.beginTransaction().apply {
+                            replace(R.id.preference_container, touchFragment)
+                            addToBackStack(null)
+                            commit()
+                        }
+                        dialog.dismiss()
+                    }
                     .setNegativeButton(android.R.string.cancel) { dialog, _ ->
                         dialog.dismiss()
                     }
                     .show()
+                
+                // Show "Adjust Touch" button only if GAMING profile is selected
+                val touchButton = alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+                touchButton?.visibility = if (selectedModeIndex != -1 && 
+                    thermalModeDialogOptions[selectedModeIndex].second == ThermalUtils.STATE_GAMING) 
+                    View.VISIBLE else View.GONE
+                
+                // Update button visibility when selection changes
+                alertDialog.listView.setOnItemClickListener { _, _, which, _ ->
+                    selectedModeIndex = which
+                    val isGaming = which >= 0 && which < thermalModeDialogOptions.size &&
+                        thermalModeDialogOptions[which].second == ThermalUtils.STATE_GAMING
+                    touchButton?.visibility = if (isGaming) View.VISIBLE else View.GONE
+                }
             }
         }
 

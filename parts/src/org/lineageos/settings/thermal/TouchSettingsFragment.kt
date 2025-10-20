@@ -41,12 +41,17 @@ class TouchSettingsFragment : PreferenceFragmentCompat(),
         addPreferencesFromResource(R.xml.touch_settings)
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
 
+        var appName = ""
         arguments?.let { bundle ->
-            val appName = bundle.getString("appName", "")
+            appName = bundle.getString("appName", "")
             packageName = bundle.getString("packageName", "")
         }
 
-        requireActivity().title = resources.getString(R.string.touch_control_title)
+        requireActivity().title = if (appName.isNotEmpty()) {
+            resources.getString(R.string.touch_control_title_with_app, appName)
+        } else {
+            resources.getString(R.string.touch_control_title)
+        }
 
         gameMode = findPreference<MainSwitchPreference>(Constants.PREF_TOUCH_GAME_MODE)!!.apply {
             addOnSwitchChangeListener(this@TouchSettingsFragment)

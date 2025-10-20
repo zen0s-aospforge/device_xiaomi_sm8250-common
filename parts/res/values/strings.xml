@@ -31,6 +31,7 @@
     <string name="select_thermal_profile">Select thermal profile</string>
     <string name="dialog_title_select_thermal_profile">Select thermal profile for %1$s</string>
      <string name="thermal_mode_icon_content_description">Current thermal mode</string>
+     <string name="button_adjust_touch">Adjust Touch</string>
 
      <!-- Thermal quick settings tile -->
      <string name="thermal_tile_label">Thermal Profile</string>
@@ -47,6 +48,7 @@
 
     <!-- Touch Control Settings -->
     <string name="touch_control_title">Touch Control</string>
+    <string name="touch_control_title_with_app">Touch Control for %1$s</string>
     <string name="touch_game_mode_title">Enable</string>
     <string name="touch_response_title">Responsivity</string>
     <string name="touch_response_summary">Controls touch response</string>
