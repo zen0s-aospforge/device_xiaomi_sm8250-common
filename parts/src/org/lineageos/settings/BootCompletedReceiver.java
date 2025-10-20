@@ -43,8 +43,6 @@ import org.lineageos.settings.touchsampling.TouchSamplingUtils;
 import org.lineageos.settings.touchsampling.TouchSamplingService;
 import org.lineageos.settings.touchsampling.TouchSamplingTileService;
 import org.lineageos.settings.turbocharging.TurboChargingService;
-import org.lineageos.settings.touch.DoubleTapService;
-import org.lineageos.settings.touch.SoFodTouchService;
 import org.lineageos.settings.chargecontrol.ChargeControlService;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
@@ -110,10 +108,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         // Start TurboChargingService
         Intent turboChargingIntent = new Intent(context, TurboChargingService.class);
         context.startService(turboChargingIntent);
-
-        // Start Touchfeatures service
-        context.startServiceAsUser(new Intent(context, DoubleTapService.class), UserHandle.CURRENT);
-        context.startServiceAsUser(new Intent(context, SoFodTouchService.class), UserHandle.CURRENT);
 
         // Start Charge Control Service
         context.startServiceAsUser(new Intent(context, ChargeControlService.class), UserHandle.CURRENT);
