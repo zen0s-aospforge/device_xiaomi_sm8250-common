@@ -29,7 +29,7 @@ class TouchSamplingSettingsActivity : CollapsingToolbarBaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        fragmentManager.beginTransaction().replace(
+        supportFragmentManager.beginTransaction().replace(
             com.android.settingslib.collapsingtoolbar.R.id.content_frame,
             TouchSamplingSettingsFragment(),
             TAG_HTSR

@@ -135,9 +135,11 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
             ?: throw IllegalStateException("Missing thermal master switch preference")
 
         mainSwitch.isChecked = thermalUtils.isEnabled()
-        mainSwitch.addOnSwitchChangeListener { _, isChecked ->
-            thermalUtils.setEnabled(isChecked)
-            updateListVisibility(isChecked)
+        mainSwitch.setOnPreferenceChangeListener { _, newValue ->
+            val isEnabled = newValue as Boolean
+            thermalUtils.setEnabled(isEnabled)
+            updateListVisibility(isEnabled)
+            true
         }
 
         updateListVisibility(mainSwitch.isChecked)
@@ -219,7 +221,7 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
         session.rebuild(activityFilter, ApplicationsState.ALPHA_COMPARATOR)
     }
 
-    // This function can remain if needed elsewhere, but not directly used for list item summary now
+    // This function is used to get the string representation of the thermal mode for the list item summary
     private fun getThermalModeString(modeState: Int): String {
         return thermalModeStringResMap[modeState]?.let { getString(it) } ?: getString(R.string.thermal_default)
     }
@@ -258,10 +260,9 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
 
             val currentModeState = thermalUtils.getStateForPackage(entry.info.packageName)
 
-            // Set the thermal mode TEXT if present
-            holder.thermalModeText?.let { summaryView ->
-                summaryView.text = getThermalModeString(currentModeState)
-                summaryView.visibility = View.VISIBLE
+            holder.thermalModeText?.let {
+                it.text = getThermalModeString(currentModeState)
+                it.visibility = View.VISIBLE
             }
 
             // Also set the thermal mode ICON if present
@@ -302,27 +303,18 @@ class ThermalSettingsFragment : PreferenceFragmentCompat(), ApplicationsState.Ca
                             val previousModeState = thermalUtils.getStateForPackage(packageName)
                             if (previousModeState != selectedModeValue) {
                                 thermalUtils.writePackage(packageName, selectedModeValue)
-                                notifyItemChanged(holder.adapterPosition) // Crucial to update the icon
+                                notifyItemChanged(holder.bindingAdapterPosition) // Crucial to update the summary
                             }
                         }
                         dialog.dismiss()
                     }
                     .setNeutralButton(R.string.button_adjust_touch) { dialog, _ ->
-                        // Launch TouchSettingsFragment for this app
-                        val bundle = Bundle().apply {
-                            putString("packageName", packageName)
-                            putString("appName", appLabel)
-                        }
-                        val touchFragment = TouchSettingsFragment().apply {
-                            arguments = bundle
-                        }
-                        
-                        parentFragmentManager.beginTransaction().apply {
-                            replace(R.id.preference_container, touchFragment)
-                            addToBackStack(null)
-                            commit()
-                        }
                         dialog.dismiss()
+                        val intent = Intent(context, TouchActivity::class.java).apply {
+                            putExtra("packageName", packageName)
+                            putExtra("appName", appLabel)
+                        }
+                        context.startActivity(intent)
                     }
                     .setNegativeButton(android.R.string.cancel) { dialog, _ ->
                         dialog.dismiss()

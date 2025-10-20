@@ -17,22 +17,21 @@ package org.lineageos.settings.thermal
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
-import android.widget.CompoundButton
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.android.settingslib.widget.MainSwitchPreference
 import org.lineageos.settings.R
-import org.lineageos.settings.widget.SeekBarPreference
 
 class TouchSettingsFragment : PreferenceFragmentCompat(), 
-    SharedPreferences.OnSharedPreferenceChangeListener, 
-    CompoundButton.OnCheckedChangeListener {
+    SharedPreferences.OnSharedPreferenceChangeListener {
 
     private lateinit var sharedPrefs: SharedPreferences
-    private lateinit var touchSensitivity: SeekBarPreference
-    private lateinit var touchResponse: SeekBarPreference
-    private lateinit var touchResistant: SeekBarPreference
+    private lateinit var touchSensitivity: androidx.preference.SeekBarPreference
+    private lateinit var touchResponse: androidx.preference.SeekBarPreference
+    private lateinit var touchResistant: androidx.preference.SeekBarPreference
     private lateinit var gameMode: MainSwitchPreference
 
     private var packageName = ""
@@ -47,36 +46,52 @@ class TouchSettingsFragment : PreferenceFragmentCompat(),
             packageName = bundle.getString("packageName", "")
         }
 
-        requireActivity().title = if (appName.isNotEmpty()) {
-            resources.getString(R.string.touch_control_title_with_app, appName)
-        } else {
-            resources.getString(R.string.touch_control_title)
+        // Set up action bar with back button
+        val activity = requireActivity()
+        if (activity.actionBar != null) {
+            activity.actionBar!!.setDisplayHomeAsUpEnabled(true)
+            activity.title = if (appName.isNotEmpty()) {
+                resources.getString(R.string.touch_control_title_with_app, appName)
+            } else {
+                resources.getString(R.string.touch_control_title)
+            }
         }
 
-        gameMode = findPreference<MainSwitchPreference>(Constants.PREF_TOUCH_GAME_MODE)!!.apply {
-            addOnSwitchChangeListener(this@TouchSettingsFragment)
+        gameMode = findPreference<MainSwitchPreference>(Constants.PREF_TOUCH_GAME_MODE)!!
+        gameMode.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
+            val isChecked = newValue as Boolean
+            touchSensitivity.isEnabled = isChecked
+            touchResponse.isEnabled = isChecked
+            touchResistant.isEnabled = isChecked
+            true
         }
 
-        touchResistant = findPreference(Constants.PREF_TOUCH_RESISTANT)!!
-        touchResponse = findPreference(Constants.PREF_TOUCH_RESPONSE)!!
-        touchSensitivity = findPreference(Constants.PREF_TOUCH_SENSITIVITY)!!
+        touchResistant = findPreference<androidx.preference.SeekBarPreference>(Constants.PREF_TOUCH_RESISTANT)!!
+        touchResponse = findPreference<androidx.preference.SeekBarPreference>(Constants.PREF_TOUCH_RESPONSE)!!
+        touchSensitivity = findPreference<androidx.preference.SeekBarPreference>(Constants.PREF_TOUCH_SENSITIVITY)!!
         
         updateDefaults()
+        
+        Log.d("TouchSettings", "Initialized touch settings for package: $packageName, app: $appName")
     }
 
     override fun onResume() {
         super.onResume()
         sharedPrefs.registerOnSharedPreferenceChangeListener(this)
+        Log.d("TouchSettings", "onResume called")
     }
 
     override fun onPause() {
         super.onPause()
         sharedPrefs.unregisterOnSharedPreferenceChangeListener(this)
+        Log.d("TouchSettings", "onPause called")
     }
 
+    @Suppress("DEPRECATION")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (item.itemId == android.R.id.home) {
-            requireActivity().onBackPressed()
+            Log.d("TouchSettings", "Back button pressed")
+            parentFragmentManager.popBackStack()
             true
         } else {
             super.onOptionsItemSelected(item)
@@ -101,13 +116,6 @@ class TouchSettingsFragment : PreferenceFragmentCompat(),
         }
     }
 
-    override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-        gameMode.isChecked = isChecked
-        touchSensitivity.isEnabled = isChecked
-        touchResponse.isEnabled = isChecked
-        touchResistant.isEnabled = isChecked
-    }
-
     private fun updateDefaults() {
         val values = getTouchValues().split(",")
         if (values.size < 4) return
@@ -120,13 +128,13 @@ class TouchSettingsFragment : PreferenceFragmentCompat(),
         touchResistant.isEnabled = modeEnabled
 
         values.getOrNull(Constants.TOUCH_RESPONSE)?.toIntOrNull()?.let { 
-            touchResponse.progress = it 
+            touchResponse.value = it 
         }
         values.getOrNull(Constants.TOUCH_SENSITIVITY)?.toIntOrNull()?.let { 
-            touchSensitivity.progress = it 
+            touchSensitivity.value = it 
         }
         values.getOrNull(Constants.TOUCH_RESISTANT)?.toIntOrNull()?.let { 
-            touchResistant.progress = it 
+            touchResistant.value = it 
         }
     }
 

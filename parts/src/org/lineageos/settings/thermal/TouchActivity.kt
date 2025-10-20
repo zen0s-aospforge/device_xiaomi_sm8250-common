@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2020 The LineageOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -9,39 +9,40 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
+
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.lineageos.settings.refreshrate
+package org.lineageos.settings.thermal
 
 import android.os.Bundle
 import android.view.MenuItem
 import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity
-import com.android.settingslib.collapsingtoolbar.R
 
-class RefreshActivity : CollapsingToolbarBaseActivity() {
-
+class TouchActivity : CollapsingToolbarBaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        supportFragmentManager.beginTransaction().replace(
-            R.id.content_frame,
-            RefreshSettingsFragment(),
-            TAG_REFRESH
-        ).commit()
+        supportFragmentManager.beginTransaction()
+            .replace(
+                com.android.settingslib.collapsingtoolbar.R.id.content_frame,
+                TouchSettingsFragment().apply {
+                    arguments = intent.extras
+                },
+                TAG
+            )
+            .commit()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressedDispatcher.onBackPressed()
+            finish()
             return true
         }
-        return false
+        return super.onOptionsItemSelected(item)
     }
 
     companion object {
-        private const val TAG_REFRESH = "refresh"
+        private const val TAG = "TouchActivity"
     }
 }

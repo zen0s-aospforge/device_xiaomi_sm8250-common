@@ -35,7 +35,7 @@ import android.widget.ListView
 import android.widget.SectionIndexer
 import android.widget.Spinner
 import android.widget.TextView
-import androidx.preference.PreferenceFragment
+import androidx.preference.PreferenceFragmentCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.settingslib.applications.ApplicationsState
@@ -44,7 +44,7 @@ import java.util.ArrayList
 import java.util.Arrays
 import java.util.HashMap
 
-class RefreshSettingsFragment : PreferenceFragment(),
+class RefreshSettingsFragment : PreferenceFragmentCompat(),
     ApplicationsState.Callbacks {
 
     private lateinit var mAllPackagesAdapter: AllPackagesAdapter
@@ -313,7 +313,7 @@ class RefreshSettingsFragment : PreferenceFragment(),
             return if (index >= 0) index else -index - 2
         }
 
-        override fun getSections(): Array<String> = mSections
+        override fun getSections(): Array<Any> = mSections as Array<Any>
     }
 
     private inner class ActivityFilter(private val mPackageManager: PackageManager) :

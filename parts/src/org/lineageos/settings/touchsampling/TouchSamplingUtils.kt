@@ -21,27 +21,31 @@ import android.content.Context
 import android.util.Log
 import org.lineageos.settings.utils.FileUtils
 
-object TouchSamplingUtils {
+class TouchSamplingUtils {
 
-    private const val TAG = "TouchSamplingUtils"
-    const val HTSR_FILE = "/sys/devices/virtual/touch/touch_dev/bump_sample_rate"
+    companion object {
+        private const val TAG = "TouchSamplingUtils"
+        const val HTSR_FILE = "/sys/devices/virtual/touch/touch_dev/bump_sample_rate"
 
-    /**
-     * Restore the touch sampling value from SharedPreferences and write it to the sysfs file.
-     * This is typically called during boot or when the service restarts.
-     *
-     * @param context The application context
-     */
-    fun restoreSamplingValue(context: Context) {
-        Log.i(TAG, "Restoring touch sampling value from SharedPreferences")
-        
-        val sharedPref = context.getSharedPreferences(
-            TouchSamplingSettingsFragment.SHAREDHTSR,
-            Context.MODE_PRIVATE
-        )
-        val htsrState = sharedPref.getInt(TouchSamplingSettingsFragment.SHAREDHTSR, 0)
-        
-        Log.d(TAG, "Restoring HTSR state: $htsrState")
-        FileUtils.writeLine(HTSR_FILE, htsrState.toString())
+        /**
+         * Restore the touch sampling value from SharedPreferences and write it to the sysfs file.
+         * This is typically called during boot or when the service restarts.
+         *
+         * @param context The application context
+         */
+        @JvmStatic
+        fun restoreSamplingValue(context: Context) {
+            Log.i(TAG, "Restoring touch sampling value from SharedPreferences")
+            
+            val sharedPref = context.getSharedPreferences(
+                TouchSamplingSettingsFragment.SHAREDHTSR,
+                Context.MODE_PRIVATE
+            )
+            val htsrState = sharedPref.getInt(TouchSamplingSettingsFragment.SHAREDHTSR, 0)
+            
+            Log.d(TAG, "Restoring HTSR state: $htsrState")
+            FileUtils.writeLine(HTSR_FILE, htsrState.toString())
+        }
     }
 }
+

@@ -160,7 +160,7 @@ class RefreshRateTileService : TileService() {
         when (currentMode) {
             MODE_DYNAMIC -> {
                 displayText = "Dynamic"
-                tile.icon = android.graphics.drawable.Icon.createWithResource(context, org.lineageos.settings.R.drawable.ic_refresh_default)
+                tile.icon = android.graphics.drawable.Icon.createWithResource(context, org.lineageos.settings.R.drawable.ic_qs_refresh_rate)
                 Log.d(TAG, "Tile icon set to DYNAMIC (ic_refresh_default)")
             }
             MODE_60HZ -> {
@@ -179,6 +179,7 @@ class RefreshRateTileService : TileService() {
             }
         }
 
+        tile.label = getString(org.lineageos.settings.R.string.refresh_rate_tile_title)
         tile.contentDescription = displayText
         tile.subtitle = displayText
         tile.state = Tile.STATE_ACTIVE

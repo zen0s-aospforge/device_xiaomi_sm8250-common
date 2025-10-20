@@ -23,7 +23,6 @@ import android.os.RemoteException
 import android.os.UserHandle
 import android.view.Display
 import android.view.Surface
-import android.view.WindowManager
 import androidx.preference.PreferenceManager
 import org.lineageos.settings.utils.FileUtils
 import vendor.xiaomi.hardware.touchfeature.V1_0.ITouchFeature
@@ -32,7 +31,7 @@ class ThermalUtils(context: Context) {
 
     private val appContext: Context = context.applicationContext
     private val sharedPrefs: SharedPreferences
-    private val display: Display
+    private val display: Display?
     private val touchFeature: ITouchFeature?
     private val serviceIntent: Intent
     private var enabledCache: Boolean
@@ -81,8 +80,7 @@ class ThermalUtils(context: Context) {
         enabledCache = sharedPrefs.getBoolean(THERMAL_ENABLED, true)
         serviceIntent = Intent(appContext, ThermalService::class.java)
 
-        val windowManager = appContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        display = windowManager.defaultDisplay
+        display = context.display
 
         touchFeature = try {
             ITouchFeature.getService()
@@ -309,7 +307,7 @@ class ThermalUtils(context: Context) {
     fun updateTouchRotation() {
         if (!touchModeChanged) return
 
-        val touchRotation = when (display.rotation) {
+        val touchRotation = when (display?.rotation) {
             Surface.ROTATION_0 -> 0
             Surface.ROTATION_90 -> 1
             Surface.ROTATION_180 -> 2
