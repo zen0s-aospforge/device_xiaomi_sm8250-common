@@ -358,7 +358,7 @@ public class TouchSamplingService extends Service {
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         
         try {
-            registerReceiver(mScreenUnlockReceiver, filter);
+            registerReceiver(mScreenUnlockReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
             Log.d(TAG, "Screen state receiver registered successfully");
         } catch (Exception e) {
             Log.e(TAG, "Failed to register screen state receiver", e);

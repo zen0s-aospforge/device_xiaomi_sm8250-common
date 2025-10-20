@@ -12,3 +12,6 @@ ro.product.marketname                                                           
 
 # SettingsLib
 settingsdebug.instant.packages u:object_r:settingslib_prop:s0
+
+# Touch properties
+persist.vendor.touch.htpr_mode u:object_r:default_prop:s0
