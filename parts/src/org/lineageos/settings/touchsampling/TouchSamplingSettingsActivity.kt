@@ -15,21 +15,24 @@
  * limitations under the License.
  */
 
-package org.lineageos.settings.touchsampling;
+package org.lineageos.settings.touchsampling
 
-import android.os.Bundle;
+import android.os.Bundle
+import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity
 
-import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity;
+class TouchSamplingSettingsActivity : CollapsingToolbarBaseActivity() {
 
-public class TouchSamplingSettingsActivity extends CollapsingToolbarBaseActivity {
+    companion object {
+        private const val TAG_HTSR = "touchsampling"
+    }
 
-    private static final String TAG_HTSR = "touchsampling";
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        getFragmentManager().beginTransaction().replace(com.android.settingslib.collapsingtoolbar.R.id.content_frame,
-                new TouchSamplingSettingsFragment(), TAG_HTSR).commit();
+        fragmentManager.beginTransaction().replace(
+            com.android.settingslib.collapsingtoolbar.R.id.content_frame,
+            TouchSamplingSettingsFragment(),
+            TAG_HTSR
+        ).commit()
     }
 }
