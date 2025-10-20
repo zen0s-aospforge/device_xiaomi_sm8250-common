@@ -21,6 +21,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.UserHandle
 import android.provider.Settings
+import android.util.Log
 import androidx.preference.PreferenceManager
 
 class RefreshUtils(context: Context) {
@@ -32,6 +33,7 @@ class RefreshUtils(context: Context) {
         private const val REFRESH_CONTROL = "refresh_control"
         private const val KEY_PEAK_REFRESH_RATE = "peak_refresh_rate"
         private const val KEY_MIN_REFRESH_RATE = "min_refresh_rate"
+        private const val TAG = "RefreshUtils"
 
         const val STATE_DEFAULT = 0
         const val STATE_STANDARD = 1
@@ -46,14 +48,14 @@ class RefreshUtils(context: Context) {
 
         var defaultMaxRate: Float = 0f
         var defaultMinRate: Float = 0f
-        var isAppInList: Boolean = false
-    }
 
-    fun startService() {
-        mContext.startServiceAsUser(
-            Intent(mContext, RefreshService::class.java),
-            UserHandle.CURRENT
-        )
+        @JvmStatic
+        fun startService(context: Context) {
+            context.startServiceAsUser(
+                Intent(context, RefreshService::class.java),
+                UserHandle.CURRENT
+            )
+        }
     }
 
     private fun writeValue(profiles: String) {
@@ -71,6 +73,7 @@ class RefreshUtils(context: Context) {
             KEY_MIN_REFRESH_RATE,
             REFRESH_STATE_DEFAULT
         )
+        Log.d(TAG, "getOldRate: defaultMaxRate=$defaultMaxRate, defaultMinRate=$defaultMinRate")
     }
 
     private fun getValue(): String {
@@ -107,40 +110,72 @@ class RefreshUtils(context: Context) {
         val modes = value.split(":")
         var state = STATE_DEFAULT
 
-        if (modes[0].contains("$packageName,")) {
+        if (modes.size > 0 && modes[0].contains("$packageName,")) {
             state = STATE_STANDARD
-        } else if (modes[1].contains("$packageName,")) {
+            Log.d(TAG, "getStateForPackage: $packageName -> STATE_STANDARD (60Hz)")
+        } else if (modes.size > 1 && modes[1].contains("$packageName,")) {
             state = STATE_EXTREME
+            Log.d(TAG, "getStateForPackage: $packageName -> STATE_EXTREME (120Hz)")
+        } else {
+            Log.d(TAG, "getStateForPackage: $packageName -> STATE_DEFAULT (not configured)")
         }
 
         return state
     }
 
     fun setRefreshRate(packageName: String) {
-        val value = getValue()
-        var maxrate = defaultMaxRate
-        var minrate = defaultMinRate
-        isAppInList = false
+        val appState = getStateForPackage(packageName)
+        var maxrate: Float
+        var minrate: Float
 
-        if (value.isNotEmpty()) {
-            val modes = value.split(":")
-
-            if (modes[0].contains("$packageName,")) {
-                maxrate = REFRESH_STATE_STANDARD
-                if (minrate > maxrate) {
-                    minrate = maxrate
-                }
-                isAppInList = true
-            } else if (modes[1].contains("$packageName,")) {
-                maxrate = REFRESH_STATE_EXTREME
-                if (minrate > maxrate) {
-                    minrate = maxrate
-                }
-                isAppInList = true
+        when (appState) {
+            STATE_STANDARD -> {
+                maxrate = REFRESH_STATE_STANDARD  // 60 Hz
+                minrate = REFRESH_STATE_STANDARD
+                Log.d(TAG, "setRefreshRate: Applying STATE_STANDARD (60Hz) for $packageName")
+            }
+            STATE_EXTREME -> {
+                maxrate = REFRESH_STATE_EXTREME   // 120 Hz
+                minrate = REFRESH_STATE_EXTREME
+                Log.d(TAG, "setRefreshRate: Applying STATE_EXTREME (120Hz) for $packageName")
+            }
+            else -> {
+                // Not in any per-app list, shouldn't be called but handle gracefully
+                getOldRate()
+                maxrate = defaultMaxRate
+                minrate = defaultMinRate
+                Log.d(TAG, "setRefreshRate: App not in list, using defaults for $packageName")
             }
         }
 
+        Log.d(TAG, "setRefreshRate: Setting refresh rate - min=$minrate, max=$maxrate for $packageName")
+        // IMPORTANT: For per-app, we only want to set the values temporarily while app is in foreground
+        // Don't persist to Settings.System as it will override global settings
         Settings.System.putFloat(mContext.contentResolver, KEY_MIN_REFRESH_RATE, minrate)
         Settings.System.putFloat(mContext.contentResolver, KEY_PEAK_REFRESH_RATE, maxrate)
+        
+        // Store the last applied app and rate for recovery
+        mSharedPrefs.edit()
+            .putString("last_app_package", packageName)
+            .putFloat("last_app_rate", maxrate)
+            .apply()
+    }
+
+    fun restoreGlobalRate() {
+        Log.d(TAG, "restoreGlobalRate: Restoring global tile settings")
+        val globalMinRate = mSharedPrefs.getFloat("global_min_rate", 60f)
+        val globalMaxRate = mSharedPrefs.getFloat("global_max_rate", 120f)
+        
+        Log.d(TAG, "restoreGlobalRate: Setting min=$globalMinRate, max=$globalMaxRate")
+        Settings.System.putFloat(mContext.contentResolver, KEY_MIN_REFRESH_RATE, globalMinRate)
+        Settings.System.putFloat(mContext.contentResolver, KEY_PEAK_REFRESH_RATE, globalMaxRate)
+    }
+
+    fun saveGlobalRate(minRate: Float, maxRate: Float) {
+        Log.d(TAG, "saveGlobalRate: Saving global settings min=$minRate, max=$maxRate")
+        mSharedPrefs.edit()
+            .putFloat("global_min_rate", minRate)
+            .putFloat("global_max_rate", maxRate)
+            .apply()
     }
 }

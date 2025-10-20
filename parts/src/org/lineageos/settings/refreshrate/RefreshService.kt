@@ -45,18 +45,33 @@ class RefreshService : Service() {
             try {
                 val info = mActivityTaskManager?.focusedRootTaskInfo
                 if (info == null || info.topActivity == null) {
+                    if (DEBUG) Log.d(TAG, "taskStackChanged: No foreground app")
                     return
                 }
                 val foregroundApp = info.topActivity!!.packageName
-                if (!mRefreshUtils.isAppInList) {
-                    mRefreshUtils.getOldRate()
-                }
+                if (DEBUG) Log.d(TAG, "taskStackChanged: foregroundApp=$foregroundApp, mPreviousApp=$mPreviousApp")
+                
                 if (foregroundApp != mPreviousApp) {
-                    mRefreshUtils.setRefreshRate(foregroundApp)
+                    if (DEBUG) Log.d(TAG, "taskStackChanged: App changed from $mPreviousApp to $foregroundApp")
+                    
+                    // Check if this app has a per-app setting
+                    val appState = mRefreshUtils.getStateForPackage(foregroundApp)
+                    if (appState != RefreshUtils.STATE_DEFAULT) {
+                        // App has a per-app setting, apply it
+                        Log.d(TAG, "taskStackChanged: $foregroundApp has per-app setting: STATE=$appState")
+                        mRefreshUtils.setRefreshRate(foregroundApp)
+                    } else {
+                        // App not in list, restore global tile setting
+                        if (DEBUG) Log.d(TAG, "taskStackChanged: $foregroundApp not in list, restoring global rate")
+                        mRefreshUtils.restoreGlobalRate()
+                    }
+                    
                     mPreviousApp = foregroundApp
+                } else {
+                    if (DEBUG) Log.d(TAG, "taskStackChanged: Same app, no change needed")
                 }
             } catch (e: Exception) {
-                // Do nothing
+                Log.e(TAG, "Error in taskStackChanged", e)
             }
         }
     }

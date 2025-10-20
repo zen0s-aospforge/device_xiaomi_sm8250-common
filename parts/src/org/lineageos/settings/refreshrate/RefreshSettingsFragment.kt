@@ -75,7 +75,7 @@ class RefreshSettingsFragment : PreferenceFragment(),
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return inflater.inflate(R.layout.refresh_layout, container, false)
     }
 
@@ -228,7 +228,7 @@ class RefreshSettingsFragment : PreferenceFragment(),
         AdapterView.OnItemSelectedListener,
         SectionIndexer {
 
-        private var mEntries: List<ApplicationsState.AppEntry> = ArrayList()
+        internal var mEntries: List<ApplicationsState.AppEntry> = ArrayList()
         private lateinit var mSections: Array<String>
         private lateinit var mPositions: IntArray
         private val mActivityFilter = ActivityFilter(context.packageManager)

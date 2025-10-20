@@ -17,6 +17,7 @@
 package org.lineageos.settings
 
 import android.content.Context
+import android.graphics.drawable.Icon
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -34,8 +35,7 @@ class RefreshRateTileService : TileService() {
     private lateinit var tile: Tile
 
     private val availableRates = ArrayList<Float>()
-    @Volatile private var activeRateMin: Int = 0
-    @Volatile private var activeRateMax: Int = 0
+    @Volatile private var currentMode: Int = MODE_DYNAMIC
     private val tileExecutor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
     private val applyRunnable = Runnable { applyRefreshRateChanges() }
@@ -53,36 +53,90 @@ class RefreshRateTileService : TileService() {
                 availableRates.add(rate)
             }
         }
+        availableRates.sort()
+        Log.d(TAG, "Available refresh rates: $availableRates")
         syncFromSettings()
     }
 
-    private fun getSettingOf(key: String): Int {
-        val rate = Settings.System.getFloat(context.contentResolver, key, 60f)
-        return availableRates.indexOf(
-            String.format(Locale.US, "%.02f", rate).toFloat()
-        )
+    private fun getSettingOf(key: String): Float {
+        return Settings.System.getFloat(context.contentResolver, key, 60f)
     }
 
     private fun syncFromSettings() {
-        activeRateMin = getSettingOf(KEY_MIN_REFRESH_RATE)
-        activeRateMax = getSettingOf(KEY_PEAK_REFRESH_RATE)
+        val minRate = getSettingOf(KEY_MIN_REFRESH_RATE)
+        val peakRate = getSettingOf(KEY_PEAK_REFRESH_RATE)
+        Log.d(TAG, "syncFromSettings: minRate=$minRate, peakRate=$peakRate")
+        
+        currentMode = when {
+            // DYNAMIC: has a range (min < max)
+            minRate < 100f && peakRate >= 120f -> {
+                Log.d(TAG, "Detected DYNAMIC mode (60-120Hz)")
+                MODE_DYNAMIC
+            }
+            // 120HZ: locked to 120
+            minRate >= 100f && peakRate >= 100f -> {
+                Log.d(TAG, "Detected 120HZ mode")
+                MODE_120HZ
+            }
+            // 60HZ: locked to 60
+            minRate <= 60f && peakRate <= 60f -> {
+                Log.d(TAG, "Detected 60HZ mode")
+                MODE_60HZ
+            }
+            else -> {
+                Log.d(TAG, "Unknown mode combination, defaulting to DYNAMIC")
+                MODE_DYNAMIC
+            }
+        }
+        Log.d(TAG, "Current mode: ${modeLabel(currentMode)}")
     }
 
     private fun cycleRefreshRateImmediate() {
-        if (activeRateMin < availableRates.size - 1) {
-            activeRateMin++
-        } else {
-            activeRateMin = 0
+        currentMode = when (currentMode) {
+            MODE_DYNAMIC -> MODE_60HZ
+            MODE_60HZ -> MODE_120HZ
+            MODE_120HZ -> MODE_DYNAMIC
+            else -> MODE_DYNAMIC
         }
+        Log.d(TAG, "Cycled to mode: ${modeLabel(currentMode)}")
     }
 
     private fun applyRefreshRateChanges() {
         tileExecutor.execute {
-            val rate = availableRates[activeRateMin]
-            Log.d(TAG, "Applying refresh rate: $rate Hz")
-            Settings.System.putFloat(context.contentResolver, KEY_MIN_REFRESH_RATE, rate)
-            Settings.System.putFloat(context.contentResolver, KEY_PREFERRED_REFRESH_RATE, rate)
-            Settings.System.putFloat(context.contentResolver, KEY_PEAK_REFRESH_RATE, rate)
+            val minRate: Float
+            val maxRate: Float
+            
+            when (currentMode) {
+                MODE_DYNAMIC -> {
+                    minRate = 60f
+                    maxRate = 120f
+                    Log.d(TAG, "Applying DYNAMIC mode: 60-120Hz")
+                }
+                MODE_60HZ -> {
+                    minRate = 60f
+                    maxRate = 60f
+                    Log.d(TAG, "Applying 60HZ mode: locked to 60Hz")
+                }
+                MODE_120HZ -> {
+                    minRate = 120f
+                    maxRate = 120f
+                    Log.d(TAG, "Applying 120HZ mode: locked to 120Hz")
+                }
+                else -> {
+                    minRate = 60f
+                    maxRate = 120f
+                }
+            }
+            
+            // Apply to system settings
+            Settings.System.putFloat(context.contentResolver, KEY_MIN_REFRESH_RATE, minRate)
+            Settings.System.putFloat(context.contentResolver, KEY_PREFERRED_REFRESH_RATE, maxRate)
+            Settings.System.putFloat(context.contentResolver, KEY_PEAK_REFRESH_RATE, maxRate)
+            
+            // Save as global default for restoring when app is not in per-app list
+            org.lineageos.settings.refreshrate.RefreshUtils(context).saveGlobalRate(minRate, maxRate)
+            
+            Log.d(TAG, "Applied: min=$minRate max=$maxRate and saved as global")
         }
     }
 
@@ -91,21 +145,45 @@ class RefreshRateTileService : TileService() {
             .replace(Regex("[\\.,]00"), "")
     }
 
+    private fun modeLabel(mode: Int): String {
+        return when (mode) {
+            MODE_DYNAMIC -> "DYNAMIC"
+            MODE_60HZ -> "60HZ"
+            MODE_120HZ -> "120HZ"
+            else -> "UNKNOWN"
+        }
+    }
+
     private fun updateTileView() {
         val displayText: String
-        val min = availableRates[activeRateMin]
-        val max = availableRates[activeRateMax]
-
-        displayText = if (min == max) {
-            getFormatRate(min)
-        } else {
-            "${getFormatRate(min)} - ${getFormatRate(max)}"
+        
+        when (currentMode) {
+            MODE_DYNAMIC -> {
+                displayText = "Dynamic"
+                tile.icon = android.graphics.drawable.Icon.createWithResource(context, org.lineageos.settings.R.drawable.ic_refresh_default)
+                Log.d(TAG, "Tile icon set to DYNAMIC (ic_refresh_default)")
+            }
+            MODE_60HZ -> {
+                displayText = "60 Hz"
+                tile.icon = android.graphics.drawable.Icon.createWithResource(context, org.lineageos.settings.R.drawable.ic_refresh_60)
+                Log.d(TAG, "Tile icon set to 60HZ (ic_refresh_60)")
+            }
+            MODE_120HZ -> {
+                displayText = "120 Hz"
+                tile.icon = android.graphics.drawable.Icon.createWithResource(context, org.lineageos.settings.R.drawable.ic_refresh_120)
+                Log.d(TAG, "Tile icon set to 120HZ (ic_refresh_120)")
+            }
+            else -> {
+                displayText = "Unknown"
+                tile.icon = android.graphics.drawable.Icon.createWithResource(context, org.lineageos.settings.R.drawable.ic_refresh_default)
+            }
         }
 
         tile.contentDescription = displayText
         tile.subtitle = displayText
-        tile.state = if (min == max) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+        tile.state = Tile.STATE_ACTIVE
         tile.updateTile()
+        Log.d(TAG, "Tile updated: $displayText")
     }
 
     override fun onStartListening() {
@@ -133,7 +211,12 @@ class RefreshRateTileService : TileService() {
         private const val KEY_PREFERRED_REFRESH_RATE = "preferred_refresh_rate"
         private const val KEY_PEAK_REFRESH_RATE = "peak_refresh_rate"
         private const val TAG = "RefreshRateTileService"
-        private const val DEBUG = false
+        private const val DEBUG = true
         private const val APPLY_DELAY_MS = 1000L  // 1 second delay before applying changes
+        
+        // Tile modes
+        private const val MODE_DYNAMIC = 0
+        private const val MODE_60HZ = 1
+        private const val MODE_120HZ = 2
     }
 }
