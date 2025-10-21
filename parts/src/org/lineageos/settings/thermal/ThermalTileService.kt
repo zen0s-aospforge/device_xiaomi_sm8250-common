@@ -28,6 +28,7 @@ class ThermalTileService : TileService() {
     private var performanceNotification: Notification? = null
     private var batterySaverObserver: ContentObserver? = null
     @Volatile private var currentMode: Int = MODE_DEFAULT
+    @Volatile private var globalMode: Int = MODE_DEFAULT
     private val tileExecutor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pendingLock = Any()
@@ -48,6 +49,9 @@ class ThermalTileService : TileService() {
         sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this)
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+        globalMode = sharedPrefs.getInt(THERMAL_GLOBAL_MODE_KEY, MODE_DEFAULT)
+        currentMode = if (isThermalProfilesEnabled()) MODE_DEFAULT else globalMode
+
         if (!sharedPrefs.contains(THERMAL_ENABLED_KEY)) {
             sharedPrefs.edit().putBoolean(THERMAL_ENABLED_KEY, true).apply()
         }
@@ -65,8 +69,13 @@ class ThermalTileService : TileService() {
     override fun onClick() {
         super.onClick()
         if (isThermalProfilesEnabled()) {
-            logDebug("Tile click ignored - thermal feature disabled")
+            logDebug("Tile click while thermal profiles enabled - disabling per-app")
             sharedPrefs.edit().putBoolean(THERMAL_ENABLED_KEY, false).apply()
+            // Update UI instantly
+            currentMode = globalMode
+            updateTile()
+            // Apply thermal mode in background
+            scheduleModeApply(globalMode, immediate = true)
             return
         }
         toggleThermalMode()
@@ -79,6 +88,8 @@ class ThermalTileService : TileService() {
         }
 
         logDebug("Tile tapped - switching to ${modeLabel(nextMode)}")
+        globalMode = nextMode
+        sharedPrefs.edit().putInt(THERMAL_GLOBAL_MODE_KEY, globalMode).apply()
         currentMode = nextMode
         updateTile()
         scheduleModeApply(nextMode)
@@ -195,15 +206,9 @@ class ThermalTileService : TileService() {
             return
         }
 
-        val detectedMode = getCurrentThermalMode()
-        currentMode = if (detectedMode == MODE_UNKNOWN) {
-            logDebug("Thermal profiles disabled, resetting thermal mode to default")
-            scheduleModeApply(MODE_DEFAULT, immediate = true)
-            MODE_DEFAULT
-        } else {
-            detectedMode
-        }
+        currentMode = globalMode
         updateTile()
+        scheduleModeApply(globalMode, immediate = true)
     }
 
     private fun updateTile() {
@@ -291,11 +296,15 @@ class ThermalTileService : TileService() {
 
                 if (isBatterySaverOn && currentMode != MODE_BATTERY_SAVER) {
                     logDebug("System Battery Saver enabled, switching to Battery Saver thermal mode")
+                    globalMode = MODE_BATTERY_SAVER
+                    sharedPrefs.edit().putInt(THERMAL_GLOBAL_MODE_KEY, globalMode).apply()
                     currentMode = MODE_BATTERY_SAVER
                     updateTile()
                     scheduleModeApply(MODE_BATTERY_SAVER)
                 } else if (!isBatterySaverOn && currentMode == MODE_BATTERY_SAVER) {
                     logDebug("System Battery Saver disabled, restoring Default thermal mode")
+                    globalMode = MODE_DEFAULT
+                    sharedPrefs.edit().putInt(THERMAL_GLOBAL_MODE_KEY, globalMode).apply()
                     currentMode = MODE_DEFAULT
                     updateTile()
                     scheduleModeApply(MODE_DEFAULT)
@@ -334,6 +343,7 @@ class ThermalTileService : TileService() {
         private const val DEBUG = true
         private const val THERMAL_SCONFIG = "/sys/class/thermal/thermal_message/sconfig"
         private const val THERMAL_ENABLED_KEY = "thermal_enabled"
+        private const val THERMAL_GLOBAL_MODE_KEY = "thermal_global_mode"
         private const val SYS_PROP = "sys.perf_mode_active"
         private const val NOTIFICATION_ID_PERFORMANCE = 1001
         private const val MODE_WRITE_DEBOUNCE_MS = 1000L
