@@ -7,17 +7,13 @@
 android_app {
     name: "XiaomiParts",
 
-    srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
-    ],
+    srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
     certificate: "platform",
     platform_apis: true,
     system_ext_specific: true,
     privileged: true,
 
-    overrides: ["MusicFX"],
     static_libs: [
         "org.lineageos.settings.resources",
         "SettingsLib",
@@ -27,15 +23,4 @@ android_app {
     optimize: {
         proguard_flags_files: ["proguard.flags"],
     },
-
-    required: [
-        "privapp_whitelist_org.lineageos.settings.xml",
-    ],
-}
-
-prebuilt_etc {
-    name: "privapp_whitelist_org.lineageos.settings.xml",
-    src: "permissions/privapp_whitelist_org.lineageos.settings.xml",
-    sub_dir: "permissions",
-    system_ext_specific: true,
 }
