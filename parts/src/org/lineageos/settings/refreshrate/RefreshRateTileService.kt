@@ -31,10 +31,13 @@ import java.util.ArrayList
 import java.util.Locale
 import java.util.concurrent.Executors
 
+import org.lineageos.settings.refreshrate.RefreshUtils // <-- 1. ADD THIS IMPORT
+
 class RefreshRateTileService : TileService() {
 
     private lateinit var context: Context
     private lateinit var tile: Tile
+    private lateinit var mRefreshUtils: RefreshUtils // <-- 2. ADD THIS LINE
 
     private val availableRates = ArrayList<Float>()
     @Volatile private var currentMode: Int = MODE_DYNAMIC
@@ -48,12 +51,25 @@ class RefreshRateTileService : TileService() {
             Log.d(TAG, "Settings changed, syncing tile")
             syncFromSettings()
             updateTileView()
+
+            // --- START FIX ---
+            // When settings change (e.g., from the main Settings page),
+            // we must also update the "global default" saved in SharedPreferences.
+            // This keeps the tile, settings page, and per-app service in sync.
+            tileExecutor.execute {
+                val minRate = getSettingOf(KEY_MIN_REFRESH_RATE)
+                val peakRate = getSettingOf(KEY_PEAK_REFRESH_RATE)
+                Log.d(TAG, "SettingsObserver: saving new global rate min=$minRate, max=$peakRate")
+                mRefreshUtils.saveGlobalRate(minRate, peakRate)
+            }
+            // --- END FIX ---
         }
     }
 
     override fun onCreate() {
         super.onCreate()
         context = applicationContext
+        mRefreshUtils = RefreshUtils(context) // <-- 3. ADD THIS LINE
         val mode = context.display!!.mode
         val modes = context.display!!.supportedModes
         for (m in modes) {
