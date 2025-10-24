@@ -52,7 +52,7 @@
     <bool name="config_supports_volume_steps" translatable="false">true</bool>
 
     <!-- Show battery cycle count -->
-    <bool name="config_show_battery_cycle_count" translatable="false">true</bool>
+    <bool name="config_show_battery_cycle_count" translatable="false">false</bool>
 
     <!-- Whether to show double tap ambient settings -->
     <bool name="config_supports_double_tap_ambient" translatable="false">true</bool>
