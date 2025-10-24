@@ -17,7 +17,9 @@
 package org.lineageos.settings
 
 import android.content.Context
+import android.database.ContentObserver
 import android.graphics.drawable.Icon
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -39,6 +41,15 @@ class RefreshRateTileService : TileService() {
     private val tileExecutor = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
     private val applyRunnable = Runnable { applyRefreshRateChanges() }
+
+    private val settingsObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
+        override fun onChange(selfChange: Boolean, uri: Uri?) {
+            super.onChange(selfChange, uri)
+            Log.d(TAG, "Settings changed, syncing tile")
+            syncFromSettings()
+            updateTileView()
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -192,6 +203,18 @@ class RefreshRateTileService : TileService() {
         tile = qsTile
         syncFromSettings()
         updateTileView()
+        
+        // Register content observer to sync with settings changes
+        context.contentResolver.registerContentObserver(
+            Settings.System.getUriFor(KEY_MIN_REFRESH_RATE), false, settingsObserver)
+        context.contentResolver.registerContentObserver(
+            Settings.System.getUriFor(KEY_PEAK_REFRESH_RATE), false, settingsObserver)
+    }
+
+    override fun onStopListening() {
+        super.onStopListening()
+        // Unregister content observer
+        context.contentResolver.unregisterContentObserver(settingsObserver)
     }
 
     override fun onClick() {
