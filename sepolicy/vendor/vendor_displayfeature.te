@@ -1,0 +1,8 @@
+## SELinux types for Xiaomi displayfeature HAL
+# Minimal declarations to satisfy checkpolicy parsing for binder allow rules
+
+# Type for the AIDL/binder service used by devicesettings_app
+type vendor_hal_displayfeature_xiaomi_service;
+
+# Type for the default (fallback) displayfeature binder node
+type vendor_hal_displayfeature_xiaomi_default;
