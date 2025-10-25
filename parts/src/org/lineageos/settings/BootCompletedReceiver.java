@@ -38,7 +38,8 @@ import androidx.preference.PreferenceManager;
 import org.lineageos.settings.doze.DozeUtils;
 import org.lineageos.settings.display.ColorModeService;
 import org.lineageos.settings.refreshrate.RefreshUtils;
- 
+import org.lineageos.settings.thermal.ThermalUtils;
+
 import org.lineageos.settings.utils.FileUtils;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
@@ -98,6 +99,9 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         
         // Enable HBM Service
         FileUtils.enableService(context);
+
+        // Start Thermal Service
+        ThermalUtils.getInstance(context).startService();
     }
 
     private void overrideHdrTypes(Context context) {
