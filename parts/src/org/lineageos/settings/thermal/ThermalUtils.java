@@ -53,9 +53,9 @@ public final class ThermalUtils {
 
     private static final Map<Integer, String> THERMAL_STATE_MAP = Map.of(
         STATE_DEFAULT, "0",
-        STATE_BENCHMARK, "4",
-        STATE_GAMING, "8",
-        STATE_ULTRACOOL, "14"
+        STATE_BENCHMARK, "10",
+        STATE_GAMING, "20",
+        STATE_ULTRACOOL, "52"
     );
 
     private static final String THERMAL_BENCHMARK = "thermal.benchmark=";

@@ -22,11 +22,10 @@ public class ColorModeFragment extends PreferenceFragment implements
     private ListPreference mColorModePreference;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.color_mode_settings);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        setPreferencesFromResource(R.xml.color_mode_settings, rootKey);
 
-        mColorModePreference = (ListPreference) findPreference("color_mode");
+        mColorModePreference = findPreference("color_mode");
         mColorModePreference.setOnPreferenceChangeListener(this);
 
         // Set current value
