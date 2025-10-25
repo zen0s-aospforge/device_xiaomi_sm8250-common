@@ -5,3 +5,9 @@ type hall_device, dev_type;
 type sound_device, dev_type;
 
 type ultrasound_device, dev_type;
+
+# Allow system_server to read sysfs_livedisplay_tuneable for HBM
+allow system_server sysfs_livedisplay_tuneable:file r_file_perms;
+
+# Allow system_server to write to zygote_tmpfs for cached app optimization
+allow system_server zygote_tmpfs:file w_file_perms;

@@ -264,6 +264,13 @@
         <item>1</item> <!-- COLOR_MODE_BOOSTED   -->
         <item>2</item>   <!-- COLOR_MODE_SATURATED -->
         <item>3</item> <!-- COLOR_MODE_AUTOMATIC -->
+        <!-- Xiaomi vendor color modes -->
+        <item>256</item> <!-- Saturated -->
+        <item>257</item> <!-- Standard -->
+        <item>258</item> <!-- Vivid -->
+        <item>267</item> <!-- sRGB -->
+        <item>268</item> <!-- P3 -->
+        <item>269</item> <!-- Original -->
     </integer-array>
 
     <!-- Color mode to use when accessibility transforms are enabled. This color mode must be
@@ -287,12 +294,26 @@
         <item>1</item> <!-- COLOR_MODE_BOOSTED   -->
         <item>2</item> <!-- COLOR_MODE_SATURATED -->
         <item>3</item> <!-- COLOR_MODE_AUTOMATIC -->
+        <!-- Xiaomi vendor color modes -->
+        <item>256</item> <!-- Saturated -->
+        <item>257</item> <!-- Standard -->
+        <item>258</item> <!-- Vivid -->
+        <item>267</item> <!-- sRGB -->
+        <item>268</item> <!-- P3 -->
+        <item>269</item> <!-- Original -->
     </integer-array>
     <integer-array name="config_displayCompositionColorSpaces">
         <item>0</item> <!-- COLOR_MODE_DEFAULT    -->
         <item>0</item> <!-- COLOR_MODE_DEFAULT    -->
         <item>0</item> <!-- COLOR_MODE_DEFAULT    -->
         <item>0</item> <!-- COLOR_MODE_DEFAULT    -->
+        <!-- Xiaomi vendor color modes - use default composition -->
+        <item>0</item> <!-- COLOR_MODE_DEFAULT for Saturated -->
+        <item>0</item> <!-- COLOR_MODE_DEFAULT for Standard -->
+        <item>0</item> <!-- COLOR_MODE_DEFAULT for Vivid -->
+        <item>0</item> <!-- COLOR_MODE_DEFAULT for sRGB -->
+        <item>0</item> <!-- COLOR_MODE_DEFAULT for P3 -->
+        <item>0</item> <!-- COLOR_MODE_DEFAULT for Original -->
     </integer-array>
 
     <!-- Whether or not wcg mode should be enabled on this device -->

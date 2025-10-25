@@ -1,2 +1,5 @@
 # Camera
 android.IRemosaicDaemon                                                                             u:object_r:vendor_remosaic_daemon_service:s0
+
+# Display feature
+vendor.xiaomi.hardware.displayfeature_aidl.IDisplayFeature/default                               u:object_r:vendor_hal_displayfeature_xiaomi_service:s0

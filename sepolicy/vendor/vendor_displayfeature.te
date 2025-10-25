@@ -2,7 +2,11 @@
 # Minimal declarations to satisfy checkpolicy parsing for binder allow rules
 
 # Type for the AIDL/binder service used by devicesettings_app
-type vendor_hal_displayfeature_xiaomi_service;
+type vendor_hal_displayfeature_xiaomi_service, vndservice_manager_type;
 
 # Type for the default (fallback) displayfeature binder node
-type vendor_hal_displayfeature_xiaomi_default;
+type vendor_hal_displayfeature_xiaomi_default, vndservice_manager_type;
+
+# Allow system_server to access displayfeature HAL for ColorModeService
+allow system_server vendor_hal_displayfeature_xiaomi_service:binder { call transfer };
+allow system_server vendor_hal_displayfeature_xiaomi_default:binder { call transfer };

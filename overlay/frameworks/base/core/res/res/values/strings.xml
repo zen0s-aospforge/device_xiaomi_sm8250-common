@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Vendor color mode names - these should match the format expected by ColorDisplayManager -->
+    <string name="color_mode_name_256">Saturated</string>
+    <string name="color_mode_name_257">Standard</string>
+    <string name="color_mode_name_258">Vivid</string>
+    <string name="color_mode_name_267">sRGB</string>
+    <string name="color_mode_name_268">P3</string>
+    <string name="color_mode_name_269">Original</string>
+</resources>

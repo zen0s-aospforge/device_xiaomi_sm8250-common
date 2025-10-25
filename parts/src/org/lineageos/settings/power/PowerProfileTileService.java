@@ -41,7 +41,7 @@ public class PowerProfileTileService extends TileService {
     private enum PowerProfile {
         DEFAULT(0, R.string.powerprofile_default, R.drawable.ic_power_default, "1"),
         BATTERY(14, R.string.powerprofile_battery, R.drawable.ic_power_battery_saver, "0"),
-        PERFORMANCE(4, R.string.powerprofile_performance, R.drawable.ic_power_performance, "2"),
+        PERFORMANCE(8, R.string.powerprofile_performance, R.drawable.ic_power_performance, "2"),
         UNKNOWN(-1, R.string.powerprofile_unknown, R.drawable.ic_power_default, "1");
 
         private final int value;

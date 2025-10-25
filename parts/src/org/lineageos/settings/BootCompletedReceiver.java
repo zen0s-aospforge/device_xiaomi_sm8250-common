@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
@@ -32,13 +33,19 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Display.HdrCapabilities;
 
+import androidx.preference.PreferenceManager;
+
 import org.lineageos.settings.doze.DozeUtils;
 import org.lineageos.settings.display.ColorModeService;
 import org.lineageos.settings.refreshrate.RefreshUtils;
+ 
+import org.lineageos.settings.utils.FileUtils;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
     private static final boolean DEBUG = false;
     private static final String TAG = "XiaomiParts";
+    private static final String DC_DIMMING_ENABLE_KEY = "dc_dimming_enable";
+    private static final String DC_DIMMING_NODE = "/sys/devices/platform/soc/soc:qcom,dsi-display-primary/dimlayer_exposure";
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -58,6 +65,11 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         try {
             // Start necessary services
             startServices(context);
+
+            // Initialize DC Dimming
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+            boolean dcDimmingEnabled = sharedPrefs.getBoolean(DC_DIMMING_ENABLE_KEY, false);
+            FileUtils.writeLine(DC_DIMMING_NODE, dcDimmingEnabled ? "1" : "0");
 
             // Override HDR types
             overrideHdrTypes(context);
@@ -83,6 +95,9 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
         // Start Refresh Rate Service
         RefreshUtils.startService(context);
+        
+        // Enable HBM Service
+        FileUtils.enableService(context);
     }
 
     private void overrideHdrTypes(Context context) {

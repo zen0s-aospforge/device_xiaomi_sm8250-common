@@ -2,6 +2,8 @@ type fingerprint_data_file, data_file_type, core_data_file_type, file_type;
 
 type sysfs_iio, fs_type, sysfs_type;
 
+type sysfs_livedisplay_tuneable, fs_type, sysfs_type;
+
 type sysfs_msm_boot, fs_type, sysfs_type;
 
 type sysfs_ssr_toggle, fs_type, sysfs_type;
@@ -28,3 +30,5 @@ type vendor_sensor_log_data_file, file_type, data_file_type;
 type vendor_thermal_data_file, file_type, data_file_type;
 
 type mdm_tombstone_data_file, data_file_type, file_type;
+
+type zygote_tmpfs, fs_type;
