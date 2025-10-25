@@ -25,4 +25,21 @@
         <item>1</item>
         <item>2</item>
     </string-array>
+    <string-array name="color_mode_entries">
+        <item>@string/color_mode_name_258</item> <!-- Vivid -->
+        <item>@string/color_mode_name_256</item> <!-- Saturated -->
+        <item>@string/color_mode_name_257</item> <!-- Standard -->
+        <item>@string/color_mode_name_269</item> <!-- Original -->
+        <item>@string/color_mode_name_268</item> <!-- P3 -->
+        <item>@string/color_mode_name_267</item> <!-- sRGB -->
+    </string-array>
+
+    <string-array name="color_mode_values">
+        <item>258</item>
+        <item>256</item>
+        <item>257</item>
+        <item>269</item>
+        <item>268</item>
+        <item>267</item>
+    </string-array>
 </resources>

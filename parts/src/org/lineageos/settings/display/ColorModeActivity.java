@@ -17,6 +17,7 @@ public class ColorModeActivity extends CollapsingToolbarBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle(R.string.color_mode_title);
         getFragmentManager().beginTransaction().replace(R.id.content_frame,
                 new ColorModeFragment(), TAG_COLORMODE).commit();
     }
