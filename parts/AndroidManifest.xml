@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="co.aospa.xiaomiparts"
+    package="org.lineageos.xiaomiparts"
     android:sharedUserId="android.uid.system">
 
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.CAMERA_OPEN_CLOSE_LISTENER" />
 
-    <protected-broadcast android:name="co.aospa.xiaomiparts.ACTION_GESTURE_TRIGGER" />
+    <protected-broadcast android:name="org.lineageos.xiaomiparts.ACTION_GESTURE_TRIGGER" />
 
     <application
         android:allowBackup="true"
@@ -28,7 +28,7 @@
             android:name=".gestures.GestureActionReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="co.aospa.xiaomiparts.ACTION_GESTURE_TRIGGER" />
+                <action android:name="org.lineageos.xiaomiparts.ACTION_GESTURE_TRIGGER" />
             </intent-filter>
         </receiver>
 
@@ -63,12 +63,12 @@
             <meta-data android:name="com.android.settings.category"
                        android:value="com.android.settings.category.ia.gestures" />
             <meta-data android:name="com.android.settings.summary_uri"
-                       android:value="content://co.aospa.xiaomiparts.device.summary/gesture_settings" />
+                       android:value="content://org.lineageos.xiaomiparts.device.summary/gesture_settings" />
         </activity>
 
         <provider
             android:name=".SummaryProvider"
-            android:authorities="co.aospa.xiaomiparts.device.summary">
+            android:authorities="org.lineageos.xiaomiparts.device.summary">
         </provider>
 
         <service
