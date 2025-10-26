@@ -116,6 +116,12 @@
     <!-- Doze: should the TYPE_PICK_UP_GESTURE sensor be used as a pulse signal. -->
     <bool name="config_dozePulsePickup">true</bool>
 
+        <!-- Type of the double tap sensor. Empty if double tap is not supported. -->
+    <string name="config_dozeDoubleTapSensorType" translatable="false">org.lineageos.sensor.double_tap</string>
+    
+    <!-- Type of the tap sensor. Empty if tap is not supported. -->
+    <string name="config_dozeTapSensorType" translatable="false">org.lineageos.sensor.single_tap</string>
+    
     <!-- Configure mobile tcp buffer sizes in the form:
          rat-name:rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max
          If no value is found for the rat-name in use, the system default will be applied.
